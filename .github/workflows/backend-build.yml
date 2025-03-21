@@ -21,9 +21,11 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: dotnet restore ClassManagementWebAPI/ClassManagementWebAPI/ClassManagementWebAPI.csproj
+      run: dotnet restore 
+      #ClassManagementWebAPI/ClassManagementWebAPI/ClassManagementWebAPI.csproj
     - name: Build
-      run: dotnet build --no-restore ClassManagementWebAPI/ClassManagementWebAPI/ClassManagementWebAPI.csproj
+      run: dotnet build --no-restore 
+      #ClassManagementWebAPI/ClassManagementWebAPI/ClassManagementWebAPI.csproj
 #    Uncomment this when tests are added      
 #    - name: Test
 #      run: dotnet test --no-build --verbosity normal ClassManagementWebAPI/ClassManagementWebAPI/ClassManagementWebAPI.csproj
