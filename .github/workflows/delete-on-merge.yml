@@ -1,0 +1,25 @@
+name: Delete Branch After Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  delete_branch:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+
+    - name: Set up Git configuration
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+    - name: Delete the branch
+      run: |
+        BRANCH_NAME=$(echo "${{ github.head_ref }}" | sed 's/refs\/heads\///')
+        git push origin --delete $BRANCH_NAME
