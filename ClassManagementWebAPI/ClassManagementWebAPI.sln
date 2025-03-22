@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassManagementWebAPI", "ClassManagementWebAPI\ClassManagementWebAPI.csproj", "{A3462A56-5C50-457A-8D85-85E3D16B4634}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassManagementWebAPI.UnitTests", "ClassManagementWebAPI.UnitTests\ClassManagementWebAPI.UnitTests.csproj", "{841A5284-847F-43BF-B2C5-9A1041EC94A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassManagementWebAPI.IntegrationTests", "ClassManagementWebAPI.IntegrationTests\ClassManagementWebAPI.IntegrationTests.csproj", "{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{A3462A56-5C50-457A-8D85-85E3D16B4634}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3462A56-5C50-457A-8D85-85E3D16B4634}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3462A56-5C50-457A-8D85-85E3D16B4634}.Release|Any CPU.Build.0 = Release|Any CPU
+		{841A5284-847F-43BF-B2C5-9A1041EC94A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{841A5284-847F-43BF-B2C5-9A1041EC94A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{841A5284-847F-43BF-B2C5-9A1041EC94A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{841A5284-847F-43BF-B2C5-9A1041EC94A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
