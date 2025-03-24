@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ClassManagementWebAPI.Authentication
+namespace ClassManagementWebAPI.Authentication;
+
+public class ApplicationUser : IdentityUser
 {
-    public class ApplicationUser : IdentityUser
-    {
-    }
 }

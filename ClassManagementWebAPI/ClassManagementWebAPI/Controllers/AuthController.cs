@@ -1,32 +1,41 @@
 ﻿using ClassManagementWebAPI.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ClassManagementWebAPI.Controllers
+namespace ClassManagementWebAPI.Controllers;
+
+[Route("api/auth")]
+[ApiController]
+public class AuthController : ControllerBase
 {
-    [Route("api/auth")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    private readonly AuthService _authService;
+
+    public AuthController(AuthService authService)
     {
-        private readonly AuthService _authService;
+        _authService = authService;
+    }
 
-        public AuthController(AuthService authService)
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] AuthModel model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
         {
-            _authService = authService;
+            return BadRequest("Email and password are required.");
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        var result = await _authService.Register(model.Email, model.Password);
+        return Ok(new { Message = result });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] AuthModel model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
         {
-            var result = await _authService.Register(model.Email, model.Password);
-            return Ok(new { Message = result });
+            return BadRequest("Email and password are required.");
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
-        {
-            var token = await _authService.Login(model.Email, model.Password);
-            if (token == null) return Unauthorized();
-            return Ok(new { Token = token });
-        }
+        var token = await _authService.Login(model.Email, model.Password);
+        if (token == null) return Unauthorized();
+        return Ok(new { Token = token });
     }
 }
