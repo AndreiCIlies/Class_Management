@@ -14,6 +14,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<TeacherService>();
+builder.Services.AddScoped<StudentService>();
+builder.Services.AddScoped<ClassService>();
+builder.Services.AddScoped<GradeService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

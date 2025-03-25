@@ -26,20 +26,19 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasForeignKey(g => g.StudentId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        // Configurare relație Grade - Class
+        // Configurare relație Grade - Course
         modelBuilder.Entity<Grade>()
             .HasOne(g => g.Class)
             .WithMany(c => c.Grades)
-            .HasForeignKey(g => g.ClassId);
-           // .OnDelete(DeleteBehavior.Cascade); 
+            .HasForeignKey(g => g.CourseId);
 
-        // Configurare relație Class - Teacher
+        // Configurare relație Course - Teacher
         modelBuilder.Entity<Class>()
             .HasOne(c => c.Teacher)
             .WithMany(t => t.Classes)
-            .HasForeignKey(c => c.TeacherId);
-
-        // Relație Many-to-Many Student - Class
+            .HasForeignKey(c => c.TeacherId)
+            .OnDelete(DeleteBehavior.Cascade);
+        //Relație Many-to - Many Student - Class
         modelBuilder.Entity<Class>()
             .HasMany(c => c.Students)
             .WithMany(s => s.Classes)
@@ -56,9 +55,9 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                 // NU şterge în cascadă de la Student (Important!)
                 j.HasOne(typeof(Student)).WithMany().HasForeignKey("StudentId").OnDelete(DeleteBehavior.NoAction);
             });
-
+     
         // Configure inheritance for Student and Teacher
-        modelBuilder.Entity<Student>().ToTable("Students");
+         modelBuilder.Entity<Student>().ToTable("Students");
         modelBuilder.Entity<Teacher>().ToTable("Teachers");
     }
 }

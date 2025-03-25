@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClassManagementWebAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250324221028_InitialCreate2")]
-    partial class InitialCreate2
+    [Migration("20250325105223_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,9 +32,15 @@ namespace ClassManagementWebAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TeacherId")
                         .IsRequired()
@@ -55,7 +61,7 @@ namespace ClassManagementWebAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClassId")
+                    b.Property<int>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<string>("StudentId")
@@ -67,7 +73,7 @@ namespace ClassManagementWebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("StudentId");
 
@@ -335,7 +341,7 @@ namespace ClassManagementWebAPI.Migrations
                 {
                     b.HasOne("ClassManagementWebAPI.Models.Class", "Class")
                         .WithMany("Grades")
-                        .HasForeignKey("ClassId")
+                        .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -6,10 +6,16 @@ namespace ClassManagementWebAPI.Models
     public class Grade
     {
         public int Id { get; set; }
-        public string StudentId { get; set; } 
+
+        [Required]
+        public string StudentId { get; set; }
         public Student Student { get; set; }
-        public int ClassId { get; set; }
-        public Class Class { get; set; }
+
+        [Required]
+        public int CourseId { get; set; }
+        public Class Class  { get; set; }
+
+        [Range(1, 100)]
         public int Value { get; set; }
     }
 }
