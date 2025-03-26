@@ -1,45 +1,41 @@
-﻿using ClassManagementWebAPI.Models;
+﻿using ClassManagementWebAPI.Controllers;
+using ClassManagementWebAPI.Data;
+using ClassManagementWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class GradeService
+public class GradeService(ApplicationDbContext context) : IGradeService
 {
-    private readonly ApplicationDbContext _context;
-
-    public GradeService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
 
     public async Task<Grade> CreateGradeAsync(Grade grade)
     {
-        _context.Grades.Add(grade);
-        await _context.SaveChangesAsync();
+        context.Grades.Add(grade);
+        await context.SaveChangesAsync();
         return grade;
     }
 
     public async Task<List<Grade>> GetAllGradesAsync()
     {
-        return await _context.Grades.ToListAsync();
+        return await context.Grades.ToListAsync();
     }
 
     public async Task<Grade?> GetGradeByIdAsync(int id)
     {
-        return await _context.Grades.FindAsync(id);
+        return await context.Grades.FindAsync(id);
     }
 
     public async Task UpdateGradeAsync(Grade grade)
     {
-        _context.Entry(grade).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        context.Entry(grade).State = EntityState.Modified;
+        await context.SaveChangesAsync();
     }
 
     public async Task DeleteGradeAsync(int id)
     {
-        var gradeToDelete = await _context.Grades.FindAsync(id);
+        var gradeToDelete = await context.Grades.FindAsync(id);
         if (gradeToDelete != null)
         {
-            _context.Grades.Remove(gradeToDelete);
-            await _context.SaveChangesAsync();
+            context.Grades.Remove(gradeToDelete);
+            await context.SaveChangesAsync();
         }
     }
 }

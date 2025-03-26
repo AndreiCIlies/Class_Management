@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ClassManagementWebAPI.Models;
+namespace ClassManagementWebAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class StudentsController : ControllerBase
+public class StudentsController(IStudentService studentService) : ControllerBase
 {
-    private readonly StudentService _studentService;
-
-    public StudentsController(StudentService studentService)
-    {
-        _studentService = studentService;
-    }
 
     [HttpPost]
     public async Task<IActionResult> CreateStudent(Student student)
@@ -24,14 +19,14 @@ public class StudentsController : ControllerBase
             return BadRequest("Student object is null");
         }
 
-        var createdStudent = await _studentService.CreateStudentAsync(student);
+        var createdStudent = await studentService.CreateStudentAsync(student);
         return CreatedAtAction(nameof(GetStudent), new { id = createdStudent.Id }, createdStudent);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetStudent(string id)
     {
-        var student = await _studentService.GetStudentByIdAsync(id);
+        var student = await studentService.GetStudentByIdAsync(id);
         if (student == null)
         {
             return NotFound();
@@ -42,7 +37,7 @@ public class StudentsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllStudents()
     {
-        var students = await _studentService.GetAllStudentsAsync();
+        var students = await studentService.GetAllStudentsAsync();
         return Ok(students);
     }
 
@@ -54,14 +49,14 @@ public class StudentsController : ControllerBase
             return BadRequest("Id mismatch");
         }
 
-        await _studentService.UpdateStudentAsync(student);
+        await studentService.UpdateStudentAsync(student);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteStudent(string id)
     {
-        await _studentService.DeleteStudentAsync(id);
+        await studentService.DeleteStudentAsync(id);
         return NoContent();
     }
 }

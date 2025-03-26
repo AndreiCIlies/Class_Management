@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ClassManagementWebAPI.Data;
+using ClassManagementWebAPI.Services;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +16,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<TeacherService>();
-builder.Services.AddScoped<StudentService>();
-builder.Services.AddScoped<ClassService>();
-builder.Services.AddScoped<GradeService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IStudentService,StudentService>();
+builder.Services.AddScoped<IClassService,ClassService >();
+builder.Services.AddScoped<IGradeService, GradeService>();
 
 var app = builder.Build();
 

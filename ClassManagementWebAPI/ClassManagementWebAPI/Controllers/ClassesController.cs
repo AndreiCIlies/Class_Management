@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ClassManagementWebAPI.Models;
+using ClassManagementWebAPI.Services;
+
+namespace ClassManagementWebAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClassesController : ControllerBase
+public class ClassesController(IClassService classService) : ControllerBase
 {
-    private readonly ClassService _classService;
-
-    public ClassesController(ClassService classService)
-    {
-        _classService = classService;
-    }
 
     [HttpPost]
     public async Task<IActionResult> CreateClass(Class @class)
@@ -20,14 +17,14 @@ public class ClassesController : ControllerBase
             return BadRequest("Class object is null");
         }
 
-        var createdClass = await _classService.CreateClassAsync(@class);
+        var createdClass = await classService.CreateClassAsync(@class);
         return CreatedAtAction(nameof(GetClass), new { id = createdClass.Id }, createdClass);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetClass(int id)
     {
-        var @class = await _classService.GetClassByIdAsync(id);
+        var @class = await classService.GetClassByIdAsync(id);
         if (@class == null)
         {
             return NotFound();
@@ -38,7 +35,7 @@ public class ClassesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllClasses()
     {
-        var classes = await _classService.GetAllClassesAsync();
+        var classes = await classService.GetAllClassesAsync();
         return Ok(classes);
     }
 
@@ -50,14 +47,14 @@ public class ClassesController : ControllerBase
             return BadRequest("Id mismatch");
         }
 
-        await _classService.UpdateClassAsync(@class);
+        await classService.UpdateClassAsync(@class);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteClass(int id)
     {
-        await _classService.DeleteClassAsync(id);
+        await classService.DeleteClassAsync(id);
         return NoContent();
     }
 }
