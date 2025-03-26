@@ -5,15 +5,8 @@ namespace ClassManagementWebAPI.Controllers;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    private readonly IAuthService _authService;
-
-    public AuthController(IAuthService authService)
-    {
-        _authService = authService;
-    }
-
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] AuthModel model)
     {
@@ -22,7 +15,7 @@ public class AuthController : ControllerBase
             return BadRequest("Email and password are required.");
         }
 
-        var result = await _authService.Register(model.Email, model.Password);
+        var result = await authService.Register(model.Email, model.Password);
         return Ok(new { Message = result });
     }
 
@@ -34,7 +27,7 @@ public class AuthController : ControllerBase
             return BadRequest("Email and password are required.");
         }
 
-        var token = await _authService.Login(model.Email, model.Password);
+        var token = await authService.Login(model.Email, model.Password);
         if (token == null) return Unauthorized();
         return Ok(new { Token = token });
     }
