@@ -1,10 +1,22 @@
+using ClassManagementWebApp.API.Auth;
+using ClassManagementWebApp.API.Client;
 using ClassManagementWebApp.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddAuthorizationCore();
+
+builder.Services.AddScoped<ApiAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<ApiAuthenticationStateProvider>());
+
+builder.Services.AddSingleton<IApiClient, ApiClient>();
 
 var app = builder.Build();
 
@@ -20,6 +32,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
