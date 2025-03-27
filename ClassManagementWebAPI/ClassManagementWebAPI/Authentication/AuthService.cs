@@ -43,7 +43,32 @@ public class AuthService(UserManager<IdentityUser> userManager, SignInManager<Id
         string firstName = Capitalize(firstnameAndLastname[0]);
         string lastName = Capitalize(firstnameAndLastname[1]);
 
-        var user = new IdentityUser { UserName = email, Email = email };
+        IdentityUser user;
+        if (email.EndsWith("@student.com"))
+        {
+            user = new Student
+            {
+                UserName = email,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName
+            };
+        }
+        else if (email.EndsWith("@teacher.com"))
+        {
+            user = new Teacher
+            {
+                UserName = email,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName
+            };
+        }
+        else
+        {
+            return "Invalid email domain. Use @student.com or @teacher.com";
+        }
+
         var result = await userManager.CreateAsync(user, password);
 
         if (!result.Succeeded)
@@ -51,30 +76,6 @@ public class AuthService(UserManager<IdentityUser> userManager, SignInManager<Id
             return "Registration Failed.";
         }
 
-        if (email.EndsWith("@student.com"))
-        {
-            var student = new Student
-            {
-                FirstName = firstName,
-                LastName = lastName
-            };
-            dbContext.Students.Add(student);
-        }
-        else if (email.EndsWith("@teacher.com"))
-        {
-            var teacher = new Teacher
-            {
-                FirstName = firstName,
-                LastName = lastName
-            };
-            dbContext.Teachers.Add(teacher);
-        }
-        else
-        {
-            return "Invalid email domain. Use @student.com or @teacher.com";
-        }
-
-        await dbContext.SaveChangesAsync();
         return "User Registered Successfully";
     }
 

@@ -1,8 +1,9 @@
 ﻿using ClassManagementWebAPI.Data;
 using ClassManagementWebAPI.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-public class StudentService(ApplicationDbContext context) : IStudentService
+public class StudentService(ApplicationDbContext context, UserManager<IdentityUser> userManager) : IStudentService
 {
 
     public async Task<Student> CreateStudentAsync(Student student)
@@ -28,13 +29,24 @@ public class StudentService(ApplicationDbContext context) : IStudentService
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteStudentAsync(string id)
+    public async Task<string> DeleteStudentAsync(string id)
     {
-        var studentToDelete = await context.Students.FindAsync(id);
-        if (studentToDelete != null)
+        var student = await context.Students.FindAsync(id);
+
+        if (student == null)
         {
-            context.Students.Remove(studentToDelete);
-            await context.SaveChangesAsync();
+            return "Student not found.";
         }
+
+        context.Students.Remove(student);
+        await context.SaveChangesAsync();
+
+        var user = await userManager.FindByIdAsync(id);
+        if (user != null)
+        {
+            await userManager.DeleteAsync(user);
+        }
+
+        return "Student deleted successfully.";
     }
 }

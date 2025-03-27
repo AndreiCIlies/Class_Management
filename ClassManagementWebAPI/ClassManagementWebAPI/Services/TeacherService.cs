@@ -1,10 +1,11 @@
 ﻿using ClassManagementWebAPI.Data;
 using ClassManagementWebAPI.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 namespace ClassManagementWebAPI.Services
 {
 
-    public class TeacherService(ApplicationDbContext context) : ITeacherService
+    public class TeacherService(ApplicationDbContext context, UserManager<IdentityUser> userManager) : ITeacherService
     {
 
         public async Task<Teacher> CreateTeacherAsync(Teacher teacher)
@@ -26,24 +27,29 @@ namespace ClassManagementWebAPI.Services
 
         public async Task UpdateTeacherAsync(Teacher teacher)
         {
-            var existingTeacher = await context.Teachers.FindAsync(teacher.Id);
-            if (existingTeacher == null)
-            {
-                throw new Exception($"Teacher with ID {teacher.Id} not found.");
-            }
-
-            context.Entry(existingTeacher).CurrentValues.SetValues(teacher);
+            context.Entry(teacher).State = EntityState.Modified;
             await context.SaveChangesAsync();
         }
 
-        public async Task DeleteTeacherAsync(string id)
+        public async Task<string> DeleteTeacherAsync(string id)
         {
-            var teacherToDelete = await context.Teachers.FindAsync(id);
-            if (teacherToDelete != null)
+            var teacher = await context.Teachers.FindAsync(id);
+
+            if (teacher == null)
             {
-                context.Teachers.Remove(teacherToDelete);
-                await context.SaveChangesAsync();
+                return "Teacher not found.";
             }
+
+            context.Teachers.Remove(teacher);
+            await context.SaveChangesAsync();
+
+            var user = await userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                await userManager.DeleteAsync(user);
+            }
+
+            return "Teacher deleted successfully.";
         }
     }
 }
