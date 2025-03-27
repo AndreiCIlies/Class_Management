@@ -1,4 +1,6 @@
-﻿@page "/counter"
+﻿@using ClassManagementWebApp.API.Client
+@using ClassManagementWebApp.API.Models
+@page "/counter"
 @rendermode InteractiveServer
 
 <PageTitle>Counter</PageTitle>
@@ -11,9 +13,12 @@
 
 @code {
     private int currentCount = 0;
+    [Inject] 
+    public IApiClient apiClient { get; set; }
 
-    private void IncrementCount()
+    private async void IncrementCount()
     {
         currentCount++;
+        await apiClient.Login(new LoginModel { Email = "simo.grig@student.com", Password = "Pass123:)" }); 
     }
 }
