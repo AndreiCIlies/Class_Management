@@ -10,25 +10,20 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] AuthModel model)
     {
-        if (model == null || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
-        {
-            return BadRequest("Email and password are required.");
-        }
-
         var result = await authService.Register(model.Email, model.Password);
-        return Ok(new { Message = result });
+        if (result == "User Registered Successfully")
+            return Ok(new { message = result });
+
+        return BadRequest(new { message = result });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] AuthModel model)
     {
-        if (model == null || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
-        {
-            return BadRequest("Email and password are required.");
-        }
-
         var token = await authService.Login(model.Email, model.Password);
-        if (token == null) return Unauthorized();
-        return Ok(new { Token = token });
+        if (token == null)
+            return Unauthorized(new { message = "Invalid email or password" });
+
+        return Ok(new { token });
     }
 }
