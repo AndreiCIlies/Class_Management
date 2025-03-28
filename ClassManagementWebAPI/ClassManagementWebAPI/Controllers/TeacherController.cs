@@ -11,6 +11,10 @@ public class TeachersController(ITeacherService teacherService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTeacher(Teacher teacher)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         if (teacher == null)
         {
             return BadRequest("Teacher object is null");
