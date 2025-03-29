@@ -1,10 +1,50 @@
+using Blazored.LocalStorage;
 using ClassManagementWebApp.Components;
+using ClassManagementWebApp.Interfaces;
+using ClassManagementWebApp.Security;
+using ClassManagementWebApp.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<ICookieService, CookieService>();
+builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddHttpClient("ClassManagementWebApp.ServerAPI", opt =>
+{
+    opt.BaseAddress = new Uri("https://localhost:7025/api/");
+    opt.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication()
+    .AddScheme<CustomOption, JWTAuthenticationHandler>(
+        "JWTAuth", options => { }
+    );
+
+builder.Services.AddScoped<JWTAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, JWTAuthenticationStateProvider>();
+
+builder.Services.AddCascadingAuthenticationState();
+
+//builder.Services.AddBlazoredLocalStorage();
+
+//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//    .AddCookie();
+
+//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7025/api/") });
+
+//builder.Services.AddScoped<ApiAuthenticationStateProvider>();
+//builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<ApiAuthenticationStateProvider>());
+//builder.Services.AddScoped<IApiClient, ApiClient>();
 
 var app = builder.Build();
 
@@ -20,6 +60,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
