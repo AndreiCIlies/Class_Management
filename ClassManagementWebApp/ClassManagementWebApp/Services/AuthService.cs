@@ -17,7 +17,7 @@ namespace ClassManagementWebApp.Services
             _httpClient = httpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
         }
 
-        public async Task<bool> Login(LoginModel model)
+        public async Task<bool> Login(AuthModel model)
         {
             var status = await _httpClient.PostAsJsonAsync("auth/login", model);
             if(status.IsSuccessStatusCode)
@@ -28,6 +28,12 @@ namespace ClassManagementWebApp.Services
                 return true;
             }
             return false;
+        }
+
+        public async Task<bool> Register(AuthModel model)
+        {
+            var status = await _httpClient.PostAsJsonAsync("auth/register", model);
+            return status.IsSuccessStatusCode;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/login"
+﻿@page "/register"
 @using ClassManagementWebApp.DTO
 @layout EmptyLayout
 
@@ -10,29 +10,28 @@
 <div class="container">
     <input type="text" @bind-value="Email" class="form-control" placeholder="Email" required autofocus />
     <input type="password" @bind-value="Password" class="form-control" placeholder="Password" required />
-    <button class="btn btn-lg btn-primary w-100" @onclick="OnLogin">
-        Sign in
+    <button class="btn btn-lg btn-primary w-100" @onclick="OnRegister">
+        Register
     </button>
 </div>
 <div>
-    <NavLink href="/register">Don't have an account? Register</NavLink>
+    <NavLink href="/login">Already have an account? Login</NavLink>
 </div>
 
 @code {
     public string Email { get; set; }
     public string Password { get; set; }
 
-    private async Task OnLogin()
+    private async Task OnRegister()
     {
-        var status = await AuthService.Login(new AuthModel
-        {
+        var status = await AuthService.Register(new AuthModel
+            {
                 Email = Email,
                 Password = Password
-        });
-
+            });
         if (status)
         {
-            nav.NavigateTo("/");
+            nav.NavigateTo("/login");
         }
     }
 }

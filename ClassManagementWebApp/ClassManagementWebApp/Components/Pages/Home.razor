@@ -1,15 +1,52 @@
 ﻿@page "/"
-@* @attribute [Authorize] *@
+@using ClassManagementWebApp.Enums
+@using ClassManagementWebApp.Security
+@using System.Security.Claims
+@using Microsoft.IdentityModel.JsonWebTokens
+@attribute [Authorize]
 @rendermode InteractiveServer
+
+@inject JWTAuthenticationStateProvider AuthStateProvider
+@inject AccessTokenService AccessTokenService
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
+@*This is just for test to see if auth works*@
 <AuthorizeView>
     <Authorized>
         <p>You are authorized</p>
+        <p>@userRole</p>
     </Authorized>
+    <NotAuthorized>
+        <p>no</p>
+    </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    private Role userRole;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitialValues();
+    }
+
+    private async Task InitialValues()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var token = await AccessTokenService.GetToken();
+            var email = user.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Email)?.Value;
+            // var email = user.
+            if (email.EndsWith("@student.com"))
+            {
+                userRole = Role.Student;
+            }
+            else if (email.EndsWith("@teacher.com"))
+            {
+                userRole = Role.Teacher;
+            }
+        }
+    }
+}
