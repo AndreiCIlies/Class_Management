@@ -1,54 +1,47 @@
-﻿using ClassManagementWebApp.Services;
+﻿using ClassManagementWebApp.Interfaces;
+using ClassManagementWebApp.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace ClassManagementWebApp.Security
+namespace ClassManagementWebApp.Security;
+
+public class JWTAuthenticationStateProvider(IAccessTokenService _accessTokenService) : AuthenticationStateProvider
 {
-    public class JWTAuthenticationStateProvider : AuthenticationStateProvider
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        private readonly AccessTokenService _accessTokenService;
-
-        public JWTAuthenticationStateProvider(AccessTokenService accessTokenService)
+        try
         {
-            _accessTokenService = accessTokenService;
-        }
-
-        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-        {
-            try
-            {
-                var token = await _accessTokenService.GetToken();
-                if (string.IsNullOrWhiteSpace(token))
-                {
-                    return await MarkAsUnauthorzied();
-                }
-
-                var readJWT = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                var identity = new ClaimsIdentity(readJWT.Claims, "JWT");
-                var principal = new ClaimsPrincipal(identity);
-
-                return await Task.FromResult(new AuthenticationState(principal));
-            }
-            catch (Exception ex)
+            var token = await _accessTokenService.GetToken();
+            if (string.IsNullOrWhiteSpace(token))
             {
                 return await MarkAsUnauthorzied();
             }
+
+            var readJWT = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            var identity = new ClaimsIdentity(readJWT.Claims, "JWT");
+            var principal = new ClaimsPrincipal(identity);
+
+            return await Task.FromResult(new AuthenticationState(principal));
         }
-
-        private async Task<AuthenticationState> MarkAsUnauthorzied()
+        catch (Exception ex)
         {
-            try
-            {
-                var state = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-                NotifyAuthenticationStateChanged(Task.FromResult(state));
+            return await MarkAsUnauthorzied();
+        }
+    }
 
-                return state;
-            }
-            catch (Exception ex)
-            {
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-            }
+    private async Task<AuthenticationState> MarkAsUnauthorzied()
+    {
+        try
+        {
+            var state = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            NotifyAuthenticationStateChanged(Task.FromResult(state));
+
+            return state;
+        }
+        catch (Exception ex)
+        {
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
     }
 }

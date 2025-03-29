@@ -1,8 +1,7 @@
-﻿namespace ClassManagementWebApp.Enums
+﻿namespace ClassManagementWebApp.Enums;
+
+public enum Role
 {
-    public enum Role
-    {
-        Teacher,
-        Student
-    }
+    Teacher,
+    Student
 }

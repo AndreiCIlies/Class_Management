@@ -1,39 +1,30 @@
 ﻿using ClassManagementWebApp.DTO;
+using ClassManagementWebApp.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json;
 
-namespace ClassManagementWebApp.Services
+namespace ClassManagementWebApp.Services;
+
+public class AuthService(IAccessTokenService _accessTokenServices, NavigationManager _navigationManager, IHttpClientFactory httpClientFactory) : IAuthService
 {
-    public class AuthService
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
+
+    public async Task<bool> Login(AuthModel model)
     {
-        private readonly AccessTokenService _accessTokenServices;
-        private readonly NavigationManager _navigationManager;
-        private readonly HttpClient _httpClient;
-
-        public AuthService(AccessTokenService accessTokenServices, NavigationManager navigationManager, IHttpClientFactory httpClientFactory)
+        var status = await _httpClient.PostAsJsonAsync("auth/login", model);
+        if(status.IsSuccessStatusCode)
         {
-            _accessTokenServices = accessTokenServices;
-            _navigationManager = navigationManager;
-            _httpClient = httpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
+            var token = await status.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<AuthResponse>(token);
+            await _accessTokenServices.SetToken(result.token);
+            return true;
         }
+        return false;
+    }
 
-        public async Task<bool> Login(AuthModel model)
-        {
-            var status = await _httpClient.PostAsJsonAsync("auth/login", model);
-            if(status.IsSuccessStatusCode)
-            {
-                var token = await status.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<AuthResponse>(token);
-                await _accessTokenServices.SetToken(result.token);
-                return true;
-            }
-            return false;
-        }
-
-        public async Task<bool> Register(AuthModel model)
-        {
-            var status = await _httpClient.PostAsJsonAsync("auth/register", model);
-            return status.IsSuccessStatusCode;
-        }
+    public async Task<bool> Register(AuthModel model)
+    {
+        var status = await _httpClient.PostAsJsonAsync("auth/register", model);
+        return status.IsSuccessStatusCode;
     }
 }

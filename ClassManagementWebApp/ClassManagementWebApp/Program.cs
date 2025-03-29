@@ -1,5 +1,6 @@
 using Blazored.LocalStorage;
 using ClassManagementWebApp.Components;
+using ClassManagementWebApp.Interfaces;
 using ClassManagementWebApp.Security;
 using ClassManagementWebApp.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,9 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddScoped<CookieService>();
-builder.Services.AddScoped<AccessTokenService>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ICookieService, CookieService>();
+builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddHttpClient("ClassManagementWebApp.ServerAPI", opt =>
 {

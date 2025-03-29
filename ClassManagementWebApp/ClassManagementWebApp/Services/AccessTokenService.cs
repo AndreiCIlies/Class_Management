@@ -1,27 +1,21 @@
-﻿namespace ClassManagementWebApp.Services
+﻿using ClassManagementWebApp.Interfaces;
+
+namespace ClassManagementWebApp.Services;
+
+public class AccessTokenService(ICookieService _cookieService) : IAccessTokenService
 {
-    public class AccessTokenService
+    public async Task SetToken(string token)
     {
-        private readonly CookieService _cookieService;
+        await _cookieService.SetCookie("access_token", token, 1);
+    }
 
-        public AccessTokenService(CookieService cookieService)
-        {
-            _cookieService = cookieService;
-        }
+    public async Task<string> GetToken()
+    {
+        return await _cookieService.GetCookie("access_token");
+    }
 
-        public async Task SetToken(string token)
-        {
-            await _cookieService.SetCookie("access_token", token, 1);
-        }
-
-        public async Task<string> GetToken()
-        {
-            return await _cookieService.GetCookie("access_token");
-        }
-
-        public async Task RemoveToken()
-        {
-            await _cookieService.DeleteCookie("access_token");
-        }
+    public async Task RemoveToken()
+    {
+        await _cookieService.DeleteCookie("access_token");
     }
 }

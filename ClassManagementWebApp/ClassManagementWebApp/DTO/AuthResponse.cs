@@ -1,7 +1,6 @@
-﻿namespace ClassManagementWebApp.DTO
+﻿namespace ClassManagementWebApp.DTO;
+
+public class AuthResponse
 {
-    public class AuthResponse
-    {
-        public string token { get; set; }
-    }
+    public string token { get; set; }
 }
