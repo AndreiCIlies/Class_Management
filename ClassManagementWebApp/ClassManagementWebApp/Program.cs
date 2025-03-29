@@ -1,7 +1,7 @@
 using Blazored.LocalStorage;
-using ClassManagementWebApp.API.Auth;
-using ClassManagementWebApp.API.Client;
 using ClassManagementWebApp.Components;
+using ClassManagementWebApp.Security;
+using ClassManagementWebApp.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http;
@@ -13,18 +13,37 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<CookieService>();
+builder.Services.AddScoped<AccessTokenService>();
+builder.Services.AddScoped<AuthService>();
 
-builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddHttpClient("ClassManagementWebApp.ServerAPI", opt =>
+{
+    opt.BaseAddress = new Uri("https://localhost:7025/api/");
+    opt.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication()
+    .AddScheme<CustomOption, JWTAuthenticationHandler>(
+        "JWTAuth", options => { }
+    );
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7025/api/") });
+builder.Services.AddScoped<JWTAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, JWTAuthenticationStateProvider>();
 
-builder.Services.AddScoped<ApiAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<ApiAuthenticationStateProvider>());
-builder.Services.AddScoped<IApiClient, ApiClient>();
+builder.Services.AddCascadingAuthenticationState();
+
+//builder.Services.AddBlazoredLocalStorage();
+
+//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//    .AddCookie();
+
+//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7025/api/") });
+
+//builder.Services.AddScoped<ApiAuthenticationStateProvider>();
+//builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<ApiAuthenticationStateProvider>());
+//builder.Services.AddScoped<IApiClient, ApiClient>();
 
 var app = builder.Build();
 
