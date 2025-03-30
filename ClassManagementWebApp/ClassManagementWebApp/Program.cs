@@ -17,6 +17,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<ICookieService, CookieService>();
 builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
 
 builder.Services.AddHttpClient("ClassManagementWebApp.ServerAPI", opt =>
 {

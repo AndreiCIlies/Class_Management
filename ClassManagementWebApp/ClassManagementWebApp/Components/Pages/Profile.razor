@@ -1,19 +1,149 @@
 ﻿@page "/profile"
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+@attribute [Authorize]
 
-<h1>Counter</h1>
+@using ClassManagementWebApp.Security
+@using Microsoft.IdentityModel.JsonWebTokens
+@using ClassManagementWebApp.Helpers
 
-<p role="status">Current count: @currentCount</p>
+@inject IStudentService StudentService
+@inject ITeacherService TeacherService
+@inject JWTAuthenticationStateProvider AuthStateProvider
+@inject IAccessTokenService AccessTokenService
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<h3>Profile Page</h3>
+
+@if (userRole == "Student" && student != null)
+{
+    <div>
+        <label>First Name:</label>
+        <input type="text" @bind-value="student.FirstName" />
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <input type="text" @bind-value="student.LastName" />
+    </div>
+    <div>
+        <label>Email:</label>
+        <input type="text" @bind-value="student.Email"/>
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" @bind-value="Password" />
+    </div>
+    <button type="submit" @onclick="UpdateStudent">Update</button>
+}
+else if (userRole == "Teacher" && teacher != null)
+{
+    <div>
+        <label>First Name:</label>
+        <input type="text" @bind-value="teacher.FirstName" />
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <input type="text" @bind-value="teacher.LastName" />
+    </div>
+    <div>
+        <label>Email:</label>
+        <input type="text" @bind-value="teacher.Email"/>
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" @bind-value="Password" />
+    </div>
+    <button type="submit" @onclick="UpdateTeacher">Update</button>
+}
+else
+{
+    <p>User not found.</p>
+}
 
 @code {
-    private int currentCount = 0;
+    private Student? student;
+    private Teacher? teacher;
+    private bool isLoading = true;
+    private string userRole = string.Empty;
+    private string userId = string.Empty;
+    private string Password = string.Empty;
+    private string Email = string.Empty;
 
-    private async void IncrementCount()
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        await InitialValues();
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            isLoading = false;
+            return;
+        }
+
+        try
+        {
+            if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(Email) && Email.Contains("@student.com"))
+            {
+                userRole = "Student";
+                if (StudentService != null)
+                {
+                    student = await StudentService.GetStudentByIdAsync(userId);
+                }
+            }
+            else if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(Email) && Email.Contains("@teacher.com"))
+            {
+                userRole = "Teacher";
+                if (TeacherService != null)
+                {
+                    teacher = await TeacherService.GetTeacherByIdAsync(userId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching user data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task UpdateStudent()
+    {
+        if (student == null) return;
+
+        student.PasswordHash = PasswordHelper.HashPassword(Password);
+        student.Email = $"{char.ToLower(student.FirstName[0])}{student.FirstName.Substring(1)}.{char.ToLower(student.LastName[0])}{student.LastName.Substring(1)}@student.com";
+        await StudentService.UpdateStudentAsync(student);
+    }
+
+    private async Task UpdateTeacher()
+    {
+        if (teacher == null) return;
+
+        teacher.PasswordHash = PasswordHelper.HashPassword(Password);
+        teacher.Email = $"{char.ToLower(teacher.FirstName[0])}{teacher.FirstName.Substring(1)}.{char.ToLower(teacher.LastName[0])}{teacher.LastName.Substring(1)}@teacher.com";
+        await TeacherService.UpdateTeacherAsync(teacher);
+    }
+
+    private async Task InitialValues()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            Console.WriteLine("User is authenticated!");
+            var token = await AccessTokenService.GetToken();
+            Console.WriteLine($"Token retrieved: {token}");
+            userId = user.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value ?? string.Empty;
+            Email = user.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Email)?.Value ?? string.Empty;
+
+            Console.WriteLine($"UserId retrieved: {userId}");
+            Console.WriteLine($"Email retrieved: {Email}");
+        }
+        else
+        {
+            Console.WriteLine("User is not authenticated or claims are missing.");
+        }
     }
 }
