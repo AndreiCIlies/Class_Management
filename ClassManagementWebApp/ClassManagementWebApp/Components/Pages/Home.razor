@@ -8,7 +8,9 @@
 
 @inject JWTAuthenticationStateProvider AuthStateProvider
 @inject IAccessTokenService AccessTokenService
+@inject IAuthService AuthService
 
+<button @onclick="LogOut">Log out</button>
 <PageTitle>Home</PageTitle>
 
 @*This is just for test to see if auth works*@
@@ -21,6 +23,7 @@
         <p>no</p>
     </NotAuthorized>
 </AuthorizeView>
+
 
 @code {
     private Role userRole;
@@ -48,5 +51,9 @@
                 userRole = Role.Teacher;
             }
         }
+    }
+    private async Task LogOut()
+    {
+        await AuthService.LogOut();
     }
 }

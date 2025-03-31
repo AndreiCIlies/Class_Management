@@ -2,6 +2,7 @@
 using ClassManagementWebApp.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 namespace ClassManagementWebApp.Services;
 
@@ -26,5 +27,12 @@ public class AuthService(IAccessTokenService _accessTokenServices, NavigationMan
     {
         var status = await _httpClient.PostAsJsonAsync("auth/register", model);
         return status.IsSuccessStatusCode;
+    }
+
+    public async Task LogOut()
+    {
+        var token = await _accessTokenServices.GetToken();
+        await _accessTokenServices.RemoveToken();
+        _navigationManager.NavigateTo("/login");
     }
 }
