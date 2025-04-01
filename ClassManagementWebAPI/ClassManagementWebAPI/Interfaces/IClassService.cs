@@ -9,6 +9,5 @@ public interface IClassService
     Task<Class?> GetClassByIdAsync(int id);
     Task UpdateClassAsync(Class @class);
     Task DeleteClassAsync(int id);
-
-
+   
 }
