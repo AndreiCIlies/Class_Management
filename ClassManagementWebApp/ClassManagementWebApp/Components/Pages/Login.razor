@@ -1,0 +1,38 @@
+﻿@page "/login"
+@using ClassManagementWebApp.DTO
+@layout EmptyLayout
+
+@rendermode InteractiveServer
+@inject IAuthService AuthService
+@inject NavigationManager nav
+
+<h1 class="text-center">Sign in to continue</h1>
+<div class="container">
+    <input type="text" @bind-value="Email" class="form-control" placeholder="Email" required autofocus />
+    <input type="password" @bind-value="Password" class="form-control" placeholder="Password" required />
+    <button class="btn btn-lg btn-primary w-100" @onclick="OnLogin">
+        Sign in
+    </button>
+</div>
+<div>
+    <NavLink href="/register">Don't have an account? Register</NavLink>
+</div>
+
+@code {
+    public string Email { get; set; }
+    public string Password { get; set; }
+
+    private async Task OnLogin()
+    {
+        var status = await AuthService.Login(new AuthModel
+        {
+                Email = Email,
+                Password = Password
+        });
+
+        if (status)
+        {
+            nav.NavigateTo("/");
+        }
+    }
+}
