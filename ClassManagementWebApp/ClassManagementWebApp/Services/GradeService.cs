@@ -6,14 +6,9 @@ using ClassManagementWebApp.DTO;
 
 namespace ClassManagementWebApp.Services;
 
-public class GradeService : IGradeService
+public class GradeService(IHttpClientFactory httpClientFactory) : IGradeService
 {
-    private readonly HttpClient _httpClient;
-
-    public GradeService(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
 
     public async Task<Grade> CreateGradeAsync(Grade grade)
     {

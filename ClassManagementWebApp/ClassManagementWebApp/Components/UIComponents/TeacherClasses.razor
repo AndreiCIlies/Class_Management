@@ -2,7 +2,8 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 
-<h3>Classes</h3>
+<h3><b>Courses</b></h3>
+<p>Choose a course to view the gradebook.</p>
 
 @if (teacherClasses == null)
 {
@@ -18,8 +19,9 @@ else
         @foreach (var cls in teacherClasses)
         {
             <button @onclick="() => SelectClass(cls.Id)">
-                @cls.Name (@cls.StartDate.ToShortDateString() - @cls.EndDate.ToShortDateString())
+                @cls.Name
             </button>
+            <br />
         }
     </div>
 }
@@ -35,7 +37,8 @@ else
 
         if (!string.IsNullOrEmpty(teacherId))
         {
-            teacherClasses = await ClassService.GetTeacherClassesAsync(teacherId);
+            var allClasses = await ClassService.GetAllClassesAsync();
+            teacherClasses = allClasses.Where(c => c.TeacherId == teacherId).ToList();
         }
     }
 

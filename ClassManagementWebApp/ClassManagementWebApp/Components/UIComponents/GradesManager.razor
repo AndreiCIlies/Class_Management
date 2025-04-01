@@ -3,7 +3,8 @@
 @inject IClassService ClassService
 @inject NavigationManager Nav
 
-<h3>Grades Manager</h3>
+<h3><b>Grades Manager</b></h3>
+<p>Manage the grades of the students in this course.</p>
 
 @if (students == null)
 {
@@ -50,6 +51,9 @@ else
         </tbody>
     </table>
 }
+<button @onclick="GoBack">
+    Go back
+</button>
 
 @code {
     [Parameter] public int ClassId { get; set; }
@@ -78,16 +82,28 @@ else
         }
 
         var grade = new Grade
-            {
-                StudentId = studentId,
-                CourseId = ClassId,
-                Value = newGrades[studentId]
-            };
+        {
+            StudentId = studentId,
+            CourseId = ClassId,
+            Value = newGrades[studentId]
+        };
+
+        await GradeService.CreateGradeAsync(grade);
 
         var student = students.FirstOrDefault(s => s.Id == studentId);
         if (student != null)
         {
-            student.Grades.Add(grade);
+            var studentIndex = students.FindIndex(s => s.Id == studentId);
+            if (studentIndex != -1)
+			{
+				student.Grades.Add(grade);
+				students[studentIndex] = student;
+			}
         }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/");
     }
 }
