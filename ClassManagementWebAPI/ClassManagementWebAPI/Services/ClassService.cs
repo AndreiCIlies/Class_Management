@@ -40,5 +40,13 @@ namespace ClassManagementWebAPI.Services
                 await context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<Class>> GetTeacherClassesAsync(string teacherId)
+        {
+            return await context.Classes
+                .Where(c => c.TeacherId == teacherId)
+                .ToListAsync();
+        }
+
     }
 }

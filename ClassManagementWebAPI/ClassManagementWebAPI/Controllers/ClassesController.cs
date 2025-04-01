@@ -57,4 +57,16 @@ public class ClassesController(IClassService classService) : ControllerBase
         await classService.DeleteClassAsync(id);
         return NoContent();
     }
+
+    [HttpGet("teacher/{teacherId}")]
+    public async Task<IActionResult> GetTeacherClasses(string teacherId)
+    {
+        var classes = await classService.GetTeacherClassesAsync(teacherId);
+        if (classes == null || classes.Count == 0)
+        {
+            return NotFound($"No classes found for teacher with ID {teacherId}");
+        }
+        return Ok(classes);
+    }
+
 }
