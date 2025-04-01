@@ -1,0 +1,46 @@
+﻿@inject IClassService ClassService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+
+<h3>Classes</h3>
+
+@if (teacherClasses == null)
+{
+    <p>Loading classes...</p>
+}
+else if (!teacherClasses.Any())
+{
+    <p>No classes found.</p>
+}
+else
+{
+    <div>
+        @foreach (var cls in teacherClasses)
+        {
+            <button @onclick="() => SelectClass(cls.Id)">
+                @cls.Name (@cls.StartDate.ToShortDateString() - @cls.EndDate.ToShortDateString())
+            </button>
+        }
+    </div>
+}
+
+@code {
+    private List<Class> teacherClasses = new();
+    private string? teacherId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        teacherId = authState.User.FindFirst(c => c.Type == "sub")?.Value;
+
+        if (!string.IsNullOrEmpty(teacherId))
+        {
+            teacherClasses = await ClassService.GetTeacherClassesAsync(teacherId);
+        }
+    }
+
+    private void SelectClass(int classId)
+    {
+        Nav.NavigateTo($"/grades/{classId}");
+    }
+}

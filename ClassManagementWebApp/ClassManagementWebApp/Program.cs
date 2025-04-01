@@ -19,6 +19,8 @@ builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IGradeService, GradeService>();
+builder.Services.AddScoped<IClassService, ClassService>();
 
 builder.Services.AddHttpClient("ClassManagementWebApp.ServerAPI", opt =>
 {

@@ -1,0 +1,93 @@
+﻿@page "/grades/{classId:int}"
+@inject IGradeService GradeService
+@inject IClassService ClassService
+@inject NavigationManager Nav
+
+<h3>Grades Manager</h3>
+
+@if (students == null)
+{
+    <p>Loading students...</p>
+}
+else if (!students.Any())
+{
+    <p>No students found for this class.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Student Email</th>
+                <th>Grades</th>
+                <th>New Grade</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr>
+                    <td>@student.Email</td>
+                    <td>
+                        @if (student.Grades.Any())
+                        {
+                            @string.Join(", ", student.Grades.Select(g => g.Value))
+                        }
+                        else
+                        {
+                            <span>No grades</span>
+                        }
+                    </td>
+                    <td>
+                        <input type="number" min="1" max="100" @bind="newGrades[student.Id]" />
+                    </td>
+                    <td>
+                        <button @onclick="() => AddGrade(student.Id)">Add Grade</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public int ClassId { get; set; }
+    private List<Student> students = new();
+    private Dictionary<string, int> newGrades = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var classData = await ClassService.GetClassByIdAsync(ClassId);
+        if (classData != null)
+        {
+            students = classData.Students;
+
+            foreach (var student in students)
+            {
+                newGrades[student.Id] = 0;
+            }
+        }
+    }
+
+    private async Task AddGrade(string studentId)
+    {
+        if (!newGrades.ContainsKey(studentId) || newGrades[studentId] < 1 || newGrades[studentId] > 100)
+        {
+            return;
+        }
+
+        var grade = new Grade
+            {
+                StudentId = studentId,
+                CourseId = ClassId,
+                Value = newGrades[studentId]
+            };
+
+        var student = students.FirstOrDefault(s => s.Id == studentId);
+        if (student != null)
+        {
+            student.Grades.Add(grade);
+        }
+    }
+}
