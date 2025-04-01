@@ -57,32 +57,32 @@ public class ClassesController(IClassService classService) : ControllerBase
         await classService.DeleteClassAsync(id);
         return NoContent();
     }
-    [HttpPost("{classId}/students/{studentId}")]
-    public async Task<IActionResult> AddStudentToClass(int classId, string studentId)
-    {
-        try
-        {
-            await classService.AddStudentToClassAsync(classId, studentId);
-            return Ok($"Student {studentId} added to class {classId}");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
+//    [HttpPost("{classId}/students/{studentId}")]
+//    public async Task<IActionResult> AddStudentToClass(int classId, string studentId)
+//    {
+//        try
+//        {
+//            await classService.AddStudentToClassAsync(classId, studentId);
+//            return Ok($"Student {studentId} added to class {classId}");
+//        }
+//        catch (Exception ex)
+//        {
+//            return BadRequest(ex.Message);
+//        }
+//    }
 
-    [HttpDelete("{classId}/students/{studentId}")]
-    public async Task<IActionResult> RemoveStudentFromClass(int classId, string studentId)
-    {
-        try
-        {
-            await classService.RemoveStudentFromClassAsync(classId, studentId);
-            return Ok($"Student {studentId} removed from class {classId}");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
+//    [HttpDelete("{classId}/students/{studentId}")]
+//    public async Task<IActionResult> RemoveStudentFromClass(int classId, string studentId)
+//    {
+//        try
+//        {
+//            await classService.RemoveStudentFromClassAsync(classId, studentId);
+//            return Ok($"Student {studentId} removed from class {classId}");
+//        }
+//        catch (Exception ex)
+//        {
+//            return BadRequest(ex.Message);
+//        }
+//    }
 
 }
