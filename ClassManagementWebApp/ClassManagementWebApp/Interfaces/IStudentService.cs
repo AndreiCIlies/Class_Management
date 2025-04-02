@@ -5,6 +5,7 @@ namespace ClassManagementWebApp.Interfaces;
 
 public interface IStudentService
 {
-    Task<Student?> GetStudentByIdAsync(string id);
+	Task<List<Student>> GetAllStudentsAsync();
+	Task<Student?> GetStudentByIdAsync(string id);
     Task UpdateStudentAsync(Student student);
 }

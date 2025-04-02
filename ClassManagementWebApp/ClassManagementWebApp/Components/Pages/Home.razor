@@ -3,6 +3,7 @@
 @using ClassManagementWebApp.Security
 @using System.Security.Claims
 @using Microsoft.IdentityModel.JsonWebTokens
+@using ClassManagementWebApp.Components.UIComponents
 @attribute [Authorize]
 @rendermode InteractiveServer
 
@@ -10,20 +11,27 @@
 @inject IAccessTokenService AccessTokenService
 @inject IAuthService AuthService
 
-<button @onclick="LogOut">Log out</button>
 <PageTitle>Home</PageTitle>
 
 @*This is just for test to see if auth works*@
 <AuthorizeView>
     <Authorized>
-        <p>You are authorized</p>
-        <p>@userRole</p>
+        @if (userRole == Role.Student)
+        {
+            <StudentPage />
+        }
+        else if (userRole == Role.Teacher)
+        {
+            <TeacherPage />
+        }
     </Authorized>
     <NotAuthorized>
         <p>no</p>
     </NotAuthorized>
 </AuthorizeView>
 
+<br/>
+<button @onclick="LogOut">Log out</button>
 
 @code {
     private Role userRole;
