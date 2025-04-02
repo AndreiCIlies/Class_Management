@@ -48,5 +48,20 @@ namespace ClassManagementWebAPI.Services
                 .ToListAsync();
         }
 
+        public async Task<List<Student>> GetStudentsInClassAsync(int classId)
+        {
+            var @class = await context.Classes
+                .Include(c => c.Students)
+                .ThenInclude(s => s.Grades)
+                .FirstOrDefaultAsync(c => c.Id == classId);
+
+            if (@class == null)
+            {
+                throw new Exception("Class not found");
+            }
+
+            return @class.Students;
+        }
     }
+
 }
