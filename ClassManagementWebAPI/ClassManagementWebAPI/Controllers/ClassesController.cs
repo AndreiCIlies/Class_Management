@@ -68,5 +68,30 @@ public class ClassesController(IClassService classService) : ControllerBase
         }
         return Ok(classes);
     }
+    [HttpGet("{classId}/students")]
+    public async Task<IActionResult> GetStudentsInClass(int classId)
+    {
+        try
+        {
+            var students = await classService.GetStudentsInClassAsync(classId);
+
+            var result = students.Select(s => new
+            {
+                s.Id,
+                s.FirstName,
+                s.LastName,
+                s.Email,
+                Grades = s.Grades
+                    .Where(g => g.CourseId == classId)
+                    .Select(g => new { g.Id, g.Value })
+            });
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 
 }
