@@ -1,0 +1,62 @@
+﻿@if (isSelected)
+{
+    <div class="modal fade show d-block" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen" style="border-radius:15px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">@Course.Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="()=> OnConfirmationChanged(false)" />
+                </div>
+                <div class="modal-body">
+                    <p>Average: @Average</p>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Grade</th>
+                                <th scope="col">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var grade in Grades)
+                            {
+                                <tr>
+                                    <td>@grade.Value</td>
+                                    <td>@grade.DateAssigned.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public Class Course { get; set; }
+    public List<Grade> Grades { get; set; }
+    public double Average { get; set; }
+
+    private bool isSelected { get; set; }
+
+    public void ShowCourseInfo(Class course, string studentId)
+    {
+        Grades = new List<Grade>();
+        Course = course;
+        foreach (var grade in course.Grades)
+        {
+            if (grade.StudentId == studentId)
+                Grades.Add(grade);
+        }
+        Average = Grades.Average(x => x.Value);
+        Grades = Grades.OrderByDescending(x => x.DateAssigned).ToList();
+        isSelected = true;
+        StateHasChanged();
+    }
+
+    public void OnConfirmationChanged(bool value)
+    {
+        isSelected = value;
+        StateHasChanged();
+    }
+}

@@ -16,4 +16,5 @@ public class Grade
 
     [Range(1, 100)]
     public int Value { get; set; }
+    public DateTime DateAssigned { get; set; } = DateTime.Now;
 }
