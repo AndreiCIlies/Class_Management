@@ -1,0 +1,58 @@
+﻿@page "/students/{classId:int}"
+@rendermode InteractiveServer
+
+@inject IClassService ClassService
+@inject NavigationManager Nav
+
+<h3><b>Students Manager</b></h3>
+<p>Manage the students in this course.</p>
+
+@if (students == null)
+{
+    <p>Loading students...</p>
+}
+else if (!students.Any())
+{
+    <p>No students found for this class.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-success text-center">
+            <tr>
+                <th>Student Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr class="text-center">
+                    <td>@student.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<button @onclick="GoBack">Go back</button>
+
+@code {
+    [Parameter] public int ClassId { get; set; }
+    private List<Student> students = new();
+    private string newStudentId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var teacherClass = await ClassService.GetClassByIdAsync(ClassId);
+
+        if (teacherClass != null)
+        {
+            students = await ClassService.GetStudentsInClassAsync(ClassId);
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/");
+    }
+}
