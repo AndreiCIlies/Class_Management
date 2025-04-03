@@ -18,6 +18,11 @@ public class ClassService(IHttpClientFactory httpClientFactory) : IClassService
         return await _httpClient.GetFromJsonAsync<List<Class>>("classes");
     }
 
+    public async Task<List<Class>> GetClassesByTeacherIdAsync(string teacherId)
+    {
+        return await _httpClient.GetFromJsonAsync<List<Class>>($"classes/teacher/{teacherId}");
+    }
+
     public async Task<Class?> GetClassByIdAsync(int id)
     {
         return await _httpClient.GetFromJsonAsync<Class>($"classes/{id}");

@@ -62,8 +62,6 @@ namespace ClassManagementWebAPI.Services
 
             return @class.Students;
         }
-    }
-
 
         public async Task AddStudentToClassAsync(int classId, string studentId)
         {

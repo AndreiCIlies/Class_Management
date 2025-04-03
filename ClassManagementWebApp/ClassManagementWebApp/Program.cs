@@ -39,6 +39,13 @@ builder.Services.AddScoped<AuthenticationStateProvider, JWTAuthenticationStatePr
 
 builder.Services.AddCascadingAuthenticationState();
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
+});
+
+
 //builder.Services.AddBlazoredLocalStorage();
 
 //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
