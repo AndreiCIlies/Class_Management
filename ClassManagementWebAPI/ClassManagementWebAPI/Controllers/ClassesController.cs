@@ -107,4 +107,18 @@ public class ClassesController(IClassService classService) : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpDelete("{classId}/students/{studentId}")]
+    public async Task<IActionResult> RemoveStudentFromClass(int classId, string studentId)
+    {
+        try
+        {
+            await classService.RemoveStudentFromClassAsync(classId, studentId);
+            return Ok("Student removed successfully.");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

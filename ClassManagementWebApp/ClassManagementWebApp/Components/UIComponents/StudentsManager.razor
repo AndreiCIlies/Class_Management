@@ -22,6 +22,7 @@ else
         <thead class="table-success text-center">
             <tr>
                 <th>Student Email</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -29,15 +30,19 @@ else
             {
                 <tr class="text-center">
                     <td>@student.Email</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="async () => await RemoveStudent(student.Email)">Remove</button>
+					</td>
                 </tr>
             }
         </tbody>
     </table>
 }
 
-<input type="text" placeholder="Student Email" @bind="studentEmail" required />
-<br />
-<button @onclick="async () => await AddStudent()">Add Student</button>
+<br/>
+<input type="text" class="form-control w-50 d-inline"  placeholder="Student Email" @bind="studentEmail" required />
+<button class="btn btn-success ms-2" @onclick="async () => await AddStudent()">Add Student</button>
+<br/>
 <br/>
 <br/>
 <button @onclick="GoBack">Go back</button>
@@ -95,6 +100,20 @@ else
 
         StateHasChanged();
     }
+
+    private async Task RemoveStudent(string studentEmailToRemove)
+	{
+        var studentToRemove = students.FirstOrDefault(s => s.Email.Equals(studentEmailToRemove, StringComparison.OrdinalIgnoreCase));
+
+		if (studentToRemove != null)
+		{
+			await ClassService.RemoveStudentFromClassAsync(ClassId, studentToRemove.Id);
+            var studentsInCourse = await ClassService.GetStudentsInClassAsync(ClassId);
+            students = studentsInCourse.OrderBy(s => s.Email).ToList();
+		}
+
+        StateHasChanged();
+	}
 
     private void GoBack()
     {
