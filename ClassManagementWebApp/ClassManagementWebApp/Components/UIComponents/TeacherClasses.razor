@@ -1,0 +1,104 @@
+﻿@using ClassManagementWebApp.Security
+
+@inject IAccessTokenService AccessTokenService
+@inject IHttpClientFactory HttpClientFactory
+@inject JWTAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+
+<h3><b>Classes</b></h3>
+
+<p>Choose a class and go to its gradebook.</p>
+
+@if (classes == null)
+{
+    <p>Loading...</p>
+}
+else if (classes.Count == 0)
+{
+    <p>No classes found.</p>
+}
+else
+{
+    <div>
+        @foreach (var classItem in classes)
+        {
+            <button class="btn btn-primary m-2" @onclick="() => NavigateToGrades(classItem.Id)">
+                @classItem.Name
+            </button>
+            <br/>
+        }
+    </div>
+}
+
+<br/>
+<h3><b>Classes</b></h3>
+
+<p>Choose a class and go to students manager.</p>
+
+@if (classes == null)
+{
+    <p>Loading...</p>
+}
+else if (classes.Count == 0)
+{
+    <p>No classes found.</p>
+}
+else
+{
+    <div>
+        @foreach (var classItem in classes)
+        {
+            <button class="btn btn-primary m-2" @onclick="() => NavigateToStudents(classItem.Id)">
+                @classItem.Name
+            </button>
+            <br/>
+        }
+    </div>
+}
+
+@code {
+    private List<Class> classes = new List<Class>();
+    private string teacherId = string.Empty;
+    private HttpClient _httpClient;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _httpClient = HttpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
+        await LoadTeacherClasses();
+    }
+
+    private async Task LoadTeacherClasses()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            teacherId = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+            if (!string.IsNullOrEmpty(teacherId))
+            {
+                try
+                {
+                    classes = await _httpClient.GetFromJsonAsync<List<Class>>($"classes/teacher/{teacherId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error fetching classes: {ex.Message}");
+                    classes = new List<Class>();
+                }
+            }
+        }
+    }
+
+    private void NavigateToGrades(int classId)
+    {
+        Nav.NavigateTo($"/grades/{classId}");
+    }
+
+    private void NavigateToStudents(int classId)
+    {
+        Nav.NavigateTo($"/students/{classId}");
+    }
+
+}

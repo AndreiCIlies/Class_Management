@@ -57,4 +57,41 @@ public class ClassesController(IClassService classService) : ControllerBase
         await classService.DeleteClassAsync(id);
         return NoContent();
     }
+
+    [HttpGet("teacher/{teacherId}")]
+    public async Task<IActionResult> GetTeacherClasses(string teacherId)
+    {
+        var classes = await classService.GetTeacherClassesAsync(teacherId);
+        if (classes == null || classes.Count == 0)
+        {
+            return NotFound($"No classes found for teacher with ID {teacherId}");
+        }
+        return Ok(classes);
+    }
+    [HttpGet("{classId}/students")]
+    public async Task<IActionResult> GetStudentsInClass(int classId)
+    {
+        try
+        {
+            var students = await classService.GetStudentsInClassAsync(classId);
+
+            var result = students.Select(s => new
+            {
+                s.Id,
+                s.FirstName,
+                s.LastName,
+                s.Email,
+                Grades = s.Grades
+                    .Where(g => g.CourseId == classId)
+                    .Select(g => new { g.Id, g.Value })
+            });
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
 }

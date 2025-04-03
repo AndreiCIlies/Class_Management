@@ -38,4 +38,47 @@ public class GradeService(ApplicationDbContext context) : IGradeService
             await context.SaveChangesAsync();
         }
     }
+    public async Task<Grade> AssignGradeAsync(string studentId, int classId, double value, string teacherId)
+    {
+       
+        var student = await context.Students.FindAsync(studentId);
+        if (student == null)
+        {
+            throw new Exception("Student not found");
+        }
+
+        
+        var @class = await context.Classes.FindAsync(classId);
+        if (@class == null)
+        {
+            throw new Exception("Class not found");
+        }
+
+        
+        var teacher = await context.Teachers.FindAsync(teacherId);
+        if (teacher == null)
+        {
+            throw new Exception("Teacher not found");
+        }
+
+        if (value < 1 || value > 100)
+        {
+            throw new Exception("Grade must be between 1 and 100");
+        }
+
+        var grade = new Grade
+        {
+            StudentId = studentId,
+            CourseId = classId,
+            Value = (int)value,
+            DateAssigned = DateTime.UtcNow
+
+
+        };
+
+        context.Grades.Add(grade);
+        await context.SaveChangesAsync();
+
+        return grade;
+    }
 }

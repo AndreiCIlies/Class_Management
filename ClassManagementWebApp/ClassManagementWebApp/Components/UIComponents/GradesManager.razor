@@ -1,0 +1,121 @@
+﻿@page "/grades/{classId:int}"
+@rendermode InteractiveServer
+
+@inject IGradeService GradeService
+@inject IClassService ClassService
+@inject NavigationManager Nav
+
+<h3><b>Grades Manager</b></h3>
+<p>Manage the grades of the students in this course.</p>
+
+@if (students == null)
+{
+    <p>Loading students...</p>
+}
+else if (!students.Any())
+{
+    <p>No students found for this class.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-success text-center">
+            <tr>
+                <th>Student Email</th>
+                <th>Grades</th>
+                <th>New Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr class ="text-center">
+                    <td>@student.Email</td>
+                    <td>
+                        @if (grades[student.Id] != null)
+                        {
+                            @string.Join(", ", grades[student.Id])
+                        }
+                        else
+                        {
+                            <span>No grades</span>
+                        }
+                    </td>
+                    <td>
+                        <input type="number" min="0" max="100" @bind="newGrade[student.Id]" />
+                        <button @onclick="() => AddGrade(student.Id)">Add Grade</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
+}
+
+<button @onclick="GoBack">Go back</button>
+
+@code {
+    [Parameter] public int ClassId { get; set; }
+    private List<Student> students = new();
+    private Dictionary<string, List<int>> grades = new();
+    private Dictionary<string, int> newGrade = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var teacherClass = await ClassService.GetClassByIdAsync(ClassId);
+
+        if (teacherClass != null)
+        {
+            students = await ClassService.GetStudentsInClassAsync(ClassId);
+
+            foreach (var student in students)
+            {
+                grades[student.Id] = new List<int> { };
+
+                foreach (var grade in student.Grades)
+                {
+                    grades[student.Id].Add(grade.Value);
+                }
+
+                newGrade[student.Id] = 0; 
+            }
+        }
+    }
+
+    private async Task AddGrade(string studentId)
+    {
+        if (newGrade[studentId] <= 0 || newGrade[studentId] > 100)
+        {
+            return;
+        }
+
+        var gradeValue = newGrade[studentId];
+
+        var grade = new Grade
+        {
+            StudentId = studentId,
+            CourseId = ClassId,
+            Value = gradeValue,
+            DateAssigned = DateTime.UtcNow
+        };
+
+        await GradeService.CreateGradeAsync(grade);
+
+        var student = students.FirstOrDefault(s => s.Id == studentId);
+
+        if (student != null)
+        {
+            var createdGrade = await GradeService.CreateGradeAsync(grade);
+            student.Grades.Add(createdGrade);
+            grades[studentId].Add(gradeValue);
+            newGrade[studentId] = 0;
+        }
+
+        StateHasChanged();
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/");
+    }
+}

@@ -40,5 +40,71 @@ namespace ClassManagementWebAPI.Services
                 await context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<Class>> GetTeacherClassesAsync(string teacherId)
+        {
+            return await context.Classes
+                .Where(c => c.TeacherId == teacherId)
+                .ToListAsync();
+        }
+
+        public async Task<List<Student>> GetStudentsInClassAsync(int classId)
+        {
+            var @class = await context.Classes
+                .Include(c => c.Students)
+                .ThenInclude(s => s.Grades)
+                .FirstOrDefaultAsync(c => c.Id == classId);
+
+            if (@class == null)
+            {
+                throw new Exception("Class not found");
+            }
+
+            return @class.Students;
+        }
+
+        public async Task AddStudentToClassAsync(int classId, string studentId)
+        {
+            var @class = await context.Classes.Include(c => c.Students)
+                .FirstOrDefaultAsync(c => c.Id == classId);
+            if (@class == null)
+            {
+                throw new Exception("Class not found");
+            }
+
+            var student = await context.Students.FindAsync(studentId);
+            if (student == null)
+            {
+                throw new Exception("Student not found");
+            }
+
+            if (!@class.Students.Contains(student))
+            {
+                @class.Students.Add(student);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task RemoveStudentFromClassAsync(int classId, string studentId)
+        {
+            var @class = await context.Classes.Include(c => c.Students)
+                .FirstOrDefaultAsync(c => c.Id == classId);
+            if (@class == null)
+            {
+                throw new Exception("Class not found");
+            }
+
+            var student = await context.Students.FindAsync(studentId);
+            if (student == null)
+            {
+                throw new Exception("Student not found");
+            }
+
+            if (@class.Students.Contains(student))
+            {
+                @class.Students.Remove(student);
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }
