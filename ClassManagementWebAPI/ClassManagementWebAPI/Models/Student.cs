@@ -7,7 +7,7 @@ namespace ClassManagementWebAPI.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public List<Grade> Grades { get; set; } = new List<Grade>(); 
-        public List<Class> Classes { get; set; } = new List<Class>(); 
+        public List<Grade>? Grades { get; set; } = new List<Grade>(); 
+        public List<Class>? Classes { get; set; } = new List<Class>(); 
     }
 }

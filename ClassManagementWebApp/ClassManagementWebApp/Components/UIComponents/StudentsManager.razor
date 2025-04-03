@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @inject IClassService ClassService
+@inject IStudentService StudentService
 @inject NavigationManager Nav
 
 <h3><b>Students Manager</b></h3>
@@ -34,12 +35,17 @@ else
     </table>
 }
 
+<input type="text" placeholder="Student Email" @bind="studentEmail" required />
+<br />
+<button @onclick="async () => await AddStudent()">Add Student</button>
+<br/>
+<br/>
 <button @onclick="GoBack">Go back</button>
 
 @code {
     [Parameter] public int ClassId { get; set; }
     private List<Student> students = new();
-    private string newStudentId = string.Empty;
+    private string studentEmail = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,8 +53,47 @@ else
 
         if (teacherClass != null)
         {
-            students = await ClassService.GetStudentsInClassAsync(ClassId);
+            var studentsList = await ClassService.GetStudentsInClassAsync(ClassId);
+            students = studentsList.OrderBy(s => s.Email).ToList();
         }
+    }
+
+    private async Task AddStudent()
+    {
+        if (string.IsNullOrWhiteSpace(studentEmail))
+        {
+            Console.WriteLine("Missing required fields.");
+            return;
+        }
+
+        var studentsInCourse = await ClassService.GetStudentsInClassAsync(ClassId);
+
+        if (studentsInCourse.Any(s => s.Email.Equals(studentEmail, StringComparison.OrdinalIgnoreCase)))
+        {
+			Console.WriteLine("Student already in course.");
+            studentEmail = string.Empty;
+			return;
+		}
+
+        var allStudents = await StudentService.GetAllStudentsAsync();
+
+        if (allStudents.Any(s => s.Email.Equals(studentEmail, StringComparison.OrdinalIgnoreCase)))
+		{
+			var student = allStudents.First(s => s.Email.Equals(studentEmail, StringComparison.OrdinalIgnoreCase));
+			await ClassService.AddStudentToClassAsync(ClassId, student.Id);
+			students.Add(student);
+		}
+		else
+		{
+			Console.WriteLine("Student not found.");
+            studentEmail = string.Empty;
+            return;
+		}
+
+        students = students.OrderBy(s => s.Email).ToList();
+        studentEmail = string.Empty;
+
+        StateHasChanged();
     }
 
     private void GoBack()

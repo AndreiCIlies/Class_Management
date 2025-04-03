@@ -94,4 +94,17 @@ public class ClassesController(IClassService classService) : ControllerBase
         }
     }
 
+    [HttpPost("{classId}/students")]
+    public async Task<IActionResult> AddStudentToClass(int classId, [FromBody] string studentId)
+    {
+        try
+        {
+            await classService.AddStudentToClassAsync(classId, studentId);
+            return Ok("Student added successfully.");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
