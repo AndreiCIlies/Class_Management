@@ -1,6 +1,7 @@
 ﻿using ClassManagementWebApp.DTO;
 using ClassManagementWebApp.Interfaces;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace ClassManagementWebApp.Services;
 
@@ -8,7 +9,13 @@ public class StudentService(IHttpClientFactory httpClientFactory) : IStudentServ
 {
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
 
-	public async Task<List<Student>> GetAllStudentsAsync()
+    public async Task<Student> CreateStudentAsync(Student student)
+    {
+        var response = await _httpClient.PostAsJsonAsync("students", student);
+        return await response.Content.ReadFromJsonAsync<Student>();
+    }
+
+    public async Task<List<Student>> GetAllStudentsAsync()
 	{
 		var response = await _httpClient.GetAsync("students");
 		if (response.IsSuccessStatusCode)
