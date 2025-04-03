@@ -58,4 +58,10 @@ public class ClassService(IHttpClientFactory httpClientFactory) : IClassService
         var response = await _httpClient.PostAsJsonAsync($"classes/{classId}/students", studentId);
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task RemoveStudentFromClassAsync(int classId, string studentId)
+    {
+        var response = await _httpClient.DeleteAsync($"classes/{classId}/students/{studentId}");
+        response.EnsureSuccessStatusCode();
+    }
 }
