@@ -55,4 +55,27 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         await gradeService.DeleteGradeAsync(id);
         return NoContent();
     }
+    [HttpPost("assign")]
+    public async Task<IActionResult> AssignGrade([FromBody] AssignGradeRequest request)
+    {
+        try
+        {
+            var grade = await gradeService.AssignGradeAsync(request.StudentId, request.ClassId, request.Value, request.TeacherId);
+            return Ok(grade);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    // DTO pentru request
+    public class AssignGradeRequest
+    {
+        public string StudentId { get; set; }
+        public int ClassId { get; set; }
+        public double Value { get; set; }
+        public string TeacherId { get; set; }
+    }
+
 }

@@ -57,31 +57,40 @@ public class ClassesController(IClassService classService) : ControllerBase
         await classService.DeleteClassAsync(id);
         return NoContent();
     }
-    [HttpPost("{classId}/students/{studentId}")]
-    public async Task<IActionResult> AddStudentToClass(int classId, string studentId)
-    {
-        try
-        {
-            await classService.AddStudentToClassAsync(classId, studentId);
-            return Ok($"Student {studentId} added to class {classId}");
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
-    [HttpDelete("{classId}/students/{studentId}")]
-    public async Task<IActionResult> RemoveStudentFromClass(int classId, string studentId)
+    [HttpGet("teacher/{teacherId}")]
+    public async Task<IActionResult> GetTeacherClasses(string teacherId)
+    {
+        var classes = await classService.GetTeacherClassesAsync(teacherId);
+        if (classes == null || classes.Count == 0)
+        {
+            return NotFound($"No classes found for teacher with ID {teacherId}");
+        }
+        return Ok(classes);
+    }
+    [HttpGet("{classId}/students")]
+    public async Task<IActionResult> GetStudentsInClass(int classId)
     {
         try
         {
-            await classService.RemoveStudentFromClassAsync(classId, studentId);
-            return Ok($"Student {studentId} removed from class {classId}");
+            var students = await classService.GetStudentsInClassAsync(classId);
+
+            var result = students.Select(s => new
+            {
+                s.Id,
+                s.FirstName,
+                s.LastName,
+                s.Email,
+                Grades = s.Grades
+                    .Where(g => g.CourseId == classId)
+                    .Select(g => new { g.Id, g.Value })
+            });
+
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 

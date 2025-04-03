@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ClassManagementWebAPI.Models
 {
@@ -9,13 +10,17 @@ namespace ClassManagementWebAPI.Models
 
         [Required]
         public string StudentId { get; set; }
-        public Student Student { get; set; }
+        public Student? Student { get; set; }
 
         [Required]
         public int CourseId { get; set; }
-        public Class Class  { get; set; }
+        public Class? Class  { get; set; }
 
         [Range(1, 100)]
         public int Value { get; set; }
+
+        [Required]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Setează data automat
+        public DateTime DateAssigned { get; set; } = DateTime.UtcNow;
     }
 }

@@ -19,6 +19,8 @@ builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IGradeService, GradeService>();
+builder.Services.AddScoped<IClassService, ClassService>();
 
 builder.Services.AddHttpClient("ClassManagementWebApp.ServerAPI", opt =>
 {
@@ -36,6 +38,13 @@ builder.Services.AddScoped<JWTAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, JWTAuthenticationStateProvider>();
 
 builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
+});
+
 
 //builder.Services.AddBlazoredLocalStorage();
 
