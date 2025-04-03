@@ -1,4 +1,5 @@
 ﻿@page "/grades/{classId:int}"
+@rendermode InteractiveServer
 
 @inject IGradeService GradeService
 @inject IClassService ClassService
@@ -17,24 +18,23 @@ else if (!students.Any())
 }
 else
 {
-    <table>
-        <thead>
+    <table class="table table-striped table-bordered">
+        <thead class="table-success text-center">
             <tr>
                 <th>Student Email</th>
                 <th>Grades</th>
                 <th>New Grade</th>
-                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var student in students)
             {
-                <tr>
+                <tr class ="text-center">
                     <td>@student.Email</td>
                     <td>
-                        @if (student.Grades.Any())
+                        @if (grades[student.Id] != null)
                         {
-                            @string.Join(", ", student.Grades.Select(g => g.Value))
+                            @string.Join(", ", grades[student.Id])
                         }
                         else
                         {
@@ -42,68 +42,76 @@ else
                         }
                     </td>
                     <td>
-                        <input type="number" min="1" max="100" @bind="grades[student.Id]" />
-                    </td>
-                    <td>
+                        <input type="number" min="0" max="100" @bind="newGrade[student.Id]" />
                         <button @onclick="() => AddGrade(student.Id)">Add Grade</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+    <br />
 }
-<button @onclick="GoBack">
-    Go back
-</button>
+
+<button @onclick="GoBack">Go back</button>
 
 @code {
     [Parameter] public int ClassId { get; set; }
     private List<Student> students = new();
-    private Dictionary<string, List<Grade>> grades = new();
-    private Dictionary<string, int> newGrades = new();
+    private Dictionary<string, List<int>> grades = new();
+    private Dictionary<string, int> newGrade = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var classData = await ClassService.GetClassByIdAsync(ClassId);
-        if (classData != null)
+        var teacherClass = await ClassService.GetClassByIdAsync(ClassId);
+
+        if (teacherClass != null)
         {
-            students = classData.Students;
+            students = await ClassService.GetStudentsInClassAsync(ClassId);
 
             foreach (var student in students)
             {
-                grades[student.Id] = student.Grades;
+                grades[student.Id] = new List<int> { };
+
+                foreach (var grade in student.Grades)
+                {
+                    grades[student.Id].Add(grade.Value);
+                }
+
+                newGrade[student.Id] = 0; 
             }
         }
     }
 
     private async Task AddGrade(string studentId)
     {
-        if (!newGrades.ContainsKey(studentId))
+        if (newGrade[studentId] <= 0 || newGrade[studentId] > 100)
         {
             return;
         }
 
-        var gradeValue = newGrades[studentId];
+        var gradeValue = newGrade[studentId];
 
         var grade = new Grade
         {
             StudentId = studentId,
             CourseId = ClassId,
-            Value = gradeValue
+            Value = gradeValue,
+            DateAssigned = DateTime.UtcNow
         };
 
         await GradeService.CreateGradeAsync(grade);
 
         var student = students.FirstOrDefault(s => s.Id == studentId);
+
         if (student != null)
         {
-            student.Grades.Add(grade);
-            
-            if (grades.ContainsKey(studentId))
-            {
-                grades[studentId].Add(grade);
-            }
+            var createdGrade = await GradeService.CreateGradeAsync(grade);
+            student.Grades.Add(createdGrade);
+            grades[studentId].Add(gradeValue);
+            newGrade[studentId] = 0;
         }
+
+        StateHasChanged();
     }
 
     private void GoBack()

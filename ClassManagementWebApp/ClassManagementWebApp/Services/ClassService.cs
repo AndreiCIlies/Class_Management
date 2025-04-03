@@ -1,4 +1,5 @@
 ﻿using ClassManagementWebApp.DTO;
+using System.Text.Json;
 
 namespace ClassManagementWebApp.Services;
 
@@ -26,6 +27,20 @@ public class ClassService(IHttpClientFactory httpClientFactory) : IClassService
     public async Task<Class?> GetClassByIdAsync(int id)
     {
         return await _httpClient.GetFromJsonAsync<Class>($"classes/{id}");
+    }
+
+    public async Task<List<Student>> GetStudentsInClassAsync(int classId)
+    {
+        var response = await _httpClient.GetAsync($"classes/{classId}/students");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            List<Student> students = JsonSerializer.Deserialize<List<Student>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return students;
+        }
+
+        throw new Exception("Unable to fetch students.");
     }
 
     public async Task UpdateClassAsync(Class @class)

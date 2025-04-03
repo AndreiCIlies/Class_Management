@@ -3,8 +3,9 @@
 @inject IAccessTokenService AccessTokenService
 @inject IHttpClientFactory HttpClientFactory
 @inject JWTAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
-<h4>My Classes</h4>
+<h3><b>My Classes</b></h3>
 
 @if (classes == null)
 {
@@ -19,7 +20,9 @@ else
     <div>
         @foreach (var classItem in classes)
         {
-            <button class="btn btn-primary m-2">@classItem.Name</button>
+            <button class="btn btn-primary m-2" @onclick="() => NavigateToGrades(classItem.Id)">
+                @classItem.Name
+            </button>
             <br/>
         }
     </div>
@@ -58,5 +61,10 @@ else
                 }
             }
         }
+    }
+
+    private void NavigateToGrades(int classId)
+    {
+        Nav.NavigateTo($"/grades/{classId}");
     }
 }
