@@ -4,6 +4,7 @@
 @using ClassManagementWebApp.Security
 @using System.Security.Claims
 @using Microsoft.IdentityModel.JsonWebTokens
+@using ClassManagementWebApp.Components.UIComponents
 @attribute [Authorize]
 @rendermode InteractiveServer
 
@@ -11,7 +12,6 @@
 @inject IAccessTokenService AccessTokenService
 @inject IAuthService AuthService
 
-<button @onclick="LogOut">Log out</button>
 <PageTitle>Home</PageTitle>
 
 <AuthorizeView>
@@ -29,6 +29,9 @@
         <p>no</p>
     </NotAuthorized>
 </AuthorizeView>
+
+<br/>
+<button @onclick="LogOut">Log out</button>
 
 @code {
     private Role userRole;

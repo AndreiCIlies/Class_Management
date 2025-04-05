@@ -28,6 +28,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany(c => c.Grades)
             .HasForeignKey(g => g.CourseId);
 
+        modelBuilder.Entity<Grade>()
+           .Property(g => g.DateAssigned)
+           .HasDefaultValueSql("GETUTCDATE()");//pentru a seta data automat
+
         // Configurare relație Course - Teacher
         modelBuilder.Entity<Class>()
             .HasOne(c => c.Teacher)
