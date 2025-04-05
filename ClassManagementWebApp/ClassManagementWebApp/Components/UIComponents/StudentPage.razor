@@ -1,5 +1,265 @@
-﻿<h3>StudentPage</h3>
+﻿@using ClassManagementWebApp.Security
+@using Microsoft.IdentityModel.JsonWebTokens
+@inject JWTAuthenticationStateProvider AuthStateProvider
+@inject IAccessTokenService AccessTokenService
+@inject IAuthService AuthService
+@inject IStudentService StudentService
+@inject ITeacherService TeacherService
+
+@if (student != null)
+{
+    <p>Welcome, @student.FirstName</p>
+    <p>Your current average is: @currentAverage</p>
+    <p>Courses: </p>
+    @foreach (var course in currentClasses)
+    {
+        <button @onclick="() => OnSelectCourse(course)">@course.Name</button>
+    }
+
+    <br />
+    <br />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Course</th>
+                <th scope="col">Grade</th>
+                <th scope="col">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var grade in currentGrades)
+            {
+                <tr>
+                    <td>
+                        @{
+                            var className = currentClasses.FirstOrDefault(c => c.Id == grade.CourseId)?.Name ?? "Unknown Class";
+                        }
+                        @className
+                    </td>
+                    <td>@grade.Value</td>
+                    <td>@grade.DateAssigned.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+<CourseComponent @ref="courseComponent" />
 
 @code {
+    public Student student { get; set; }
+    public string selectedCourse { get; set; } = string.Empty;
 
+    private List<Class> currentClasses = [];
+    private List<Grade> currentGrades = [];
+    private double currentAverage;
+    private CourseComponent courseComponent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        InitializeStudent();
+    }
+
+    public void OnSelectCourse(Class course)
+    {
+        courseComponent.ShowCourseInfo(course, student.Id);
+    }
+
+    public async void InitializeStudent()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var token = await AccessTokenService.GetToken();
+            var studentId = user.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+            student = await StudentService.GetStudentByIdAsync(studentId);
+
+            //-----------------DELETE THIS WHEN THE CHANGES ARE MADE IN THE BACKEND-----------------
+
+            // var teacher = await TeacherService.GetTeacherByIdAsync("fede8ae2-6da5-4387-8d3e-107b6dab0bf0");
+
+            // student.Classes = [
+            //     new Class
+            //     {
+            //         Id = 1,
+            //         Name = "Math",
+            //         StartDate = new DateTime(2025, 1, 1),
+            //         EndDate = new DateTime(2025, 6, 1),
+            //         TeacherId = "fede8ae2-6da5-4387-8d3e-107b6dab0bf0",
+            //         Teacher = teacher,
+            //         Grades = [
+            //             new Grade
+            //             {
+            //                 Id = 1,
+            //                 StudentId = studentId,
+            //                 CourseId = 1,
+            //                 Value = 90,
+            //                 DateAssigned = new DateTime(2025, 1, 1)
+            //             },
+            //             new Grade
+            //             {
+            //                 Id = 3,
+            //                 StudentId = studentId,
+            //                 CourseId = 1,
+            //                 Value = 95,
+            //                 DateAssigned = new DateTime(2025, 1, 1)
+            //             },
+            //             new Grade
+            //             {
+            //                 Id = 5,
+            //                 StudentId = studentId,
+            //                 CourseId = 1,
+            //                 Value = 100,
+            //                 DateAssigned = new DateTime(2025, 1, 1)
+            //             },
+            //             new Grade
+            //             {
+            //                 Id = 7,
+            //                 StudentId = studentId,
+            //                 CourseId = 1,
+            //                 Value = 85,
+            //                 DateAssigned = new DateTime(2025, 1, 1)
+            //             }
+            //         ]
+            //     },
+            //     new Class
+            //     {
+            //         Id = 2,
+            //         Name = "Science",
+            //         StartDate = new DateTime(2025, 1, 1),
+            //         EndDate = new DateTime(2025, 6, 1),
+            //         TeacherId = "fede8ae2-6da5-4387-8d3e-107b6dab0bf0",
+            //         Teacher = teacher,
+            //         Grades = [
+            //             new Grade
+            //             {
+            //                 Id = 2,
+            //                 StudentId = studentId,
+            //                 CourseId = 2,
+            //                 Value = 85,
+            //                 DateAssigned = new DateTime(2025, 2, 1)
+            //             },
+            //             new Grade
+            //             {
+            //                 Id = 4,
+            //                 StudentId = studentId,
+            //                 CourseId = 2,
+            //                 Value = 80,
+            //                 DateAssigned = new DateTime(2025, 2, 10)
+            //             },
+            //             new Grade
+            //             {
+            //                 Id = 6,
+            //                 StudentId = studentId,
+            //                 CourseId = 2,
+            //                 Value = 75,
+            //                 DateAssigned = new DateTime(2025, 3, 10)
+            //             },
+            //             new Grade
+            //             {
+            //                 Id = 8,
+            //                 StudentId = studentId,
+            //                 CourseId = 2,
+            //                 Value = 90,
+            //                 DateAssigned = new DateTime(2025, 4, 22)
+            //             }
+            //         ]
+            //     }
+            // ];
+
+            // student.Grades = [
+            //     new Grade
+            //     {
+            //         Id = 1,
+            //         StudentId = studentId,
+            //         CourseId = 1,
+            //         Value = 90,
+            //         DateAssigned = new DateTime(2025, 1, 1)
+            //     },
+            //     new Grade
+            //     {
+            //         Id = 2,
+            //         StudentId = studentId,
+            //         CourseId = 2,
+            //         Value = 85,
+            //         DateAssigned = new DateTime(2025, 2, 1)
+            //     },
+            //     new Grade
+            //     {
+            //         Id = 3,
+            //         StudentId = studentId,
+            //         CourseId = 1,
+            //         Value = 95,
+            //         DateAssigned = new DateTime(2025, 1, 1)
+            //     },
+            //     new Grade
+            //     {
+            //         Id = 4,
+            //         StudentId = studentId,
+            //         CourseId = 2,
+            //         Value = 80,
+            //         DateAssigned = new DateTime(2025, 2, 10)
+            //     },
+            //     new Grade
+            //     {
+            //         Id = 5,
+            //         StudentId = studentId,
+            //         CourseId = 1,
+            //         Value = 100,
+            //         DateAssigned = new DateTime(2025, 1, 1)
+            //     },
+            //     new Grade
+            //     {
+            //         Id = 6,
+            //         StudentId = studentId,
+            //         CourseId = 2,
+            //         Value = 75,
+            //         DateAssigned = new DateTime(2025, 3, 10)
+            //     },
+            //     new Grade
+            //     {
+            //         Id = 7,
+            //         StudentId = studentId,
+            //         CourseId = 1,
+            //         Value = 85,
+            //         DateAssigned = new DateTime(2025, 1, 1)
+            //     },
+            //     new Grade
+            //     {
+            //         Id = 8,
+            //         StudentId = studentId,
+            //         CourseId = 2,
+            //         Value = 90,
+            //         DateAssigned = new DateTime(2025, 4, 22)
+            //     }
+            // ];
+            foreach (var course in student.Classes)
+            {
+                if (course.EndDate > DateTime.Now)
+                    currentClasses.Add(course);
+            }
+
+            var currentClassIds = currentClasses.Select(c => c.Id).ToHashSet();
+            currentAverage = student.Grades
+                .Where(x => currentClassIds.Contains(x.CourseId))
+                .Select(x => x.Value)
+                .DefaultIfEmpty(0)
+                .Average();
+
+            currentGrades = student.Grades
+                .Where(x => currentClassIds.Contains(x.CourseId))
+                .ToList();
+
+            currentGrades = currentGrades.OrderByDescending(x => x.DateAssigned).ToList();
+
+            StateHasChanged();
+        }
+    }
 }
