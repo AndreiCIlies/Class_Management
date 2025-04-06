@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using ClassManagementWebApp.Components.UIComponents
 @using ClassManagementWebApp.Enums
 @using ClassManagementWebApp.Security
 @using System.Security.Claims
@@ -13,7 +14,6 @@
 
 <PageTitle>Home</PageTitle>
 
-@*This is just for test to see if auth works*@
 <AuthorizeView>
     <Authorized>
         @if (userRole == Role.Student)
@@ -49,7 +49,6 @@
         {
             var token = await AccessTokenService.GetToken();
             var email = user.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Email)?.Value;
-            // var email = user.
             if (email.EndsWith("@student.com"))
             {
                 userRole = Role.Student;
