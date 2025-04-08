@@ -5,6 +5,10 @@
 @inject JWTAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 
+<button class="btn btn-primary m-2" @onclick="ShowAddGroupComponent">
+    Add Class
+    </button>
+
 <h3><b>My Classes</b></h3>
 
 @if (classes == null)
@@ -28,10 +32,14 @@ else
     </div>
 }
 
+<AddCourseComponent OnConfirmationChanged="OnClassAdded" @ref="addGroupComponent" />
+
 @code {
     private List<Class> classes = new List<Class>();
     private string teacherId = string.Empty;
     private HttpClient _httpClient;
+
+    private AddCourseComponent addGroupComponent;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,5 +74,17 @@ else
     private void NavigateToGrades(int classId)
     {
         Nav.NavigateTo($"/grades/{classId}");
+    }
+
+    private void ShowAddGroupComponent()
+    {
+        addGroupComponent.Show();
+    }
+
+    public async Task OnClassAdded(Class newClass)
+    {
+        classes.Add(newClass);
+        //add the new class to the database
+        StateHasChanged();
     }
 }
