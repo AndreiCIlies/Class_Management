@@ -13,5 +13,5 @@ public interface IClassService
     Task RemoveStudentFromClassAsync(int classId, string studentId);
     Task<List<Class>> GetTeacherClassesAsync(string teacherId);
     Task<List<Student>> GetStudentsInClassAsync(int classId);
-
+    Task<List<Class>> GetStudentClassesAsync(string studentId);
 }

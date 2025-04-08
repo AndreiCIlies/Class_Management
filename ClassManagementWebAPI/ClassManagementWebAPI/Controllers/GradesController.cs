@@ -69,6 +69,17 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         }
     }
 
+    [HttpGet("student/{studentId}")]
+    public async Task<IActionResult> GetGradesByStudent(string studentId)
+    {
+        var grades = await gradeService.GetGradesByStudentIdAsync(studentId);
+        if (grades == null || !grades.Any())
+        {
+            return NotFound();
+        }
+        return Ok(grades);
+    }
+
     // DTO pentru request
     public class AssignGradeRequest
     {

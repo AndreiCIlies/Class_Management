@@ -81,4 +81,11 @@ public class GradeService(ApplicationDbContext context) : IGradeService
 
         return grade;
     }
+
+    public Task<List<Grade>> GetGradesByStudentIdAsync(string studentId)
+    {
+        return context.Grades
+            .Where(g => g.StudentId == studentId)
+            .ToListAsync();
+    }
 }
