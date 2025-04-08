@@ -2,12 +2,19 @@
 
 @inject IAccessTokenService AccessTokenService
 @inject IHttpClientFactory HttpClientFactory
+@inject IClassService ClassService
 @inject JWTAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 
 <button class="btn btn-primary m-2" @onclick="ShowAddGroupComponent">
     Add Class
-    </button>
+</button>
+@if (!addCourseSuccess)
+{
+    <div class="alert alert-danger" role="alert">
+        Failed to add class. Please try again.
+    </div>
+}
 
 <h3><b>My Classes</b></h3>
 
@@ -32,14 +39,15 @@ else
     </div>
 }
 
-<AddCourseComponent OnConfirmationChanged="OnClassAdded" @ref="addGroupComponent" />
+<AddCourseComponent OnConfirmationChanged="OnClassAdded" @ref="addCourseComponent" />
 
 @code {
     private List<Class> classes = new List<Class>();
     private string teacherId = string.Empty;
     private HttpClient _httpClient;
 
-    private AddCourseComponent addGroupComponent;
+    private AddCourseComponent addCourseComponent;
+    private bool addCourseSuccess = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,13 +86,22 @@ else
 
     private void ShowAddGroupComponent()
     {
-        addGroupComponent.Show();
+        addCourseComponent.Show();
     }
 
     public async Task OnClassAdded(Class newClass)
     {
         classes.Add(newClass);
         //add the new class to the database
+        var state = await ClassService.CreateClassAsync(newClass);
+        if (state != null)
+        {
+            addCourseSuccess = true;
+        }
+        else
+        {
+            addCourseSuccess = false;
+        }
         StateHasChanged();
     }
 }
