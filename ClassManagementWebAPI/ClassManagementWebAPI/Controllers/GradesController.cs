@@ -85,6 +85,13 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         return Ok(grades);
     }
 
+    [HttpGet("class/{classId}/{studentId}/history")]
+    public async Task<IActionResult> GetClassStudentGradesHistory(int classId, string studentId)
+    {
+        var grades = await gradeService.GetClassStudentGradesHistory(classId, studentId);
+        return Ok(grades);
+    }
+
     [HttpGet("student/{studentId}/history")]
     public async Task<IActionResult> GetStudentGradesHistory(string studentId)
     {
