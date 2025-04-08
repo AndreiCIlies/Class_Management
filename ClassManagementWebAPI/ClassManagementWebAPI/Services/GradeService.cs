@@ -86,11 +86,12 @@ public class GradeService(ApplicationDbContext context) : IGradeService
     {
         var grades = await context.Grades
             .Where(g => g.CourseId == classId)
+            .OrderByDescending(g => g.DateAssigned)
             .ToListAsync();
 
         if (grades == null || grades.Count == 0)
         {
-            throw new Exception("No grades for this class");
+            return new List<Grade>();
         }
 
         return grades;
@@ -100,11 +101,12 @@ public class GradeService(ApplicationDbContext context) : IGradeService
     {
         var grades = await context.Grades
             .Where(g => g.StudentId == studentId)
+            .OrderByDescending(g => g.DateAssigned)
             .ToListAsync();
 
         if (grades == null || grades.Count == 0)
         {
-            throw new Exception("No grades for this class");
+            return new List<Grade>();
         }
 
         return grades;
