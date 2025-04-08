@@ -1,0 +1,117 @@
+﻿@inject IHttpClientFactory HttpClientFactory
+
+<select @bind="selectedStudentEmail">
+    <option value="">-- Select Student Email --</option>
+    @foreach (var student in students)
+    {
+        <option value="@student.Email">@student.Email</option>
+    }
+</select>
+
+<button @onclick="FetchGradeHistory">View</button>
+
+<button @onclick="ToggleGradeHistoryVisibility">
+    @(isGradeHistoryVisible ? "Hide" : "Show") Grades History
+</button>
+
+@if (isGradeHistoryVisible && gradesHistory != null && gradesHistory.Any())
+{
+    <br />
+    <h4>Grades History for Student @selectedStudentEmail</h4>
+    <table class="table table-striped table-bordered">
+        <thead class="table-success text-center">
+            <tr>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Grade</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var grade in gradesHistory)
+            {
+                <tr class="text-center">
+                    <td>@($"{grade.Student?.FirstName} {grade.Student?.LastName}")</td>
+                    <td>@grade.Class?.Name</td>
+                    <td>@grade.Value</td>
+                    <td>@grade.DateAssigned.ToString("dd/MM/yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (isGradeHistoryVisible && (gradesHistory == null || !gradesHistory.Any()))
+{
+    <p>No grades available for the selected class.</p>
+}
+else if (gradesHistory == null || !gradesHistory.Any())
+{
+    <p>No grades available for the selected class.</p>
+}
+
+@code {
+    [Parameter] public string StudentEmail { get; set; } = string.Empty;
+    private List<Student> students = new List<Student>();
+    private List<string> studentEmails = new();
+    private string selectedStudentEmail = string.Empty;
+    private string studentId = string.Empty;
+    private List<Grade> gradesHistory = new List<Grade>();
+    private bool isGradeHistoryVisible = true;
+    private HttpClient _httpClient;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _httpClient = HttpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
+
+        try
+        {
+            students = await _httpClient.GetFromJsonAsync<List<Student>>("students");
+            if (students != null)
+            {
+                studentEmails = students.Select(s => s.Email).ToList();
+                selectedStudentEmail = studentEmails.FirstOrDefault() ?? string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading student emails: {ex.Message}");
+        }
+    }
+
+    private async Task FetchGradeHistory()
+    {
+        if (string.IsNullOrWhiteSpace(selectedStudentEmail))
+            return;
+
+        try
+        {
+            students = await _httpClient.GetFromJsonAsync<List<Student>>("students");
+            Student selectedStudent = students.FirstOrDefault(s => s.Email == selectedStudentEmail);
+
+            if (selectedStudent == null)
+            {
+                return;
+            }
+            
+            studentId = selectedStudent.Id;
+
+            gradesHistory = await _httpClient.GetFromJsonAsync<List<Grade>>($"grades/student/{studentId}/history");
+
+            foreach (var grade in gradesHistory)
+            {
+                grade.Student = selectedStudent;
+                grade.Class = await _httpClient.GetFromJsonAsync<Class>($"classes/{grade.CourseId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching grade history: {ex.Message}");
+            gradesHistory = new List<Grade>();
+        }
+    }
+
+    private void ToggleGradeHistoryVisibility()
+    {
+        isGradeHistoryVisible = !isGradeHistoryVisible;
+    }
+}
