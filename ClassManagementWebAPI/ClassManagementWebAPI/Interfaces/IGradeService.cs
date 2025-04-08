@@ -12,5 +12,6 @@ public interface IGradeService
     Task DeleteGradeAsync(int id);
     Task<Grade> AssignGradeAsync(string studentId, int classId, double value, string teacherId);
     Task<List<Grade>> GetClassGradesHistory(int classId);
+    Task<List<Grade>> GetClassStudentGradesHistory(int classId, string studentId);
     Task<List<Grade>> GetStudentGradesHistory(string studentId);
 }

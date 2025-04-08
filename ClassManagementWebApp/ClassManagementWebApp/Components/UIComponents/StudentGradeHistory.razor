@@ -1,0 +1,50 @@
+﻿@using ClassManagementWebApp.Security
+
+@inject IHttpClientFactory HttpClientFactory
+@inject JWTAuthenticationStateProvider AuthStateProvider
+
+<h3>Grade History</h3>
+
+<p>Choose a subject and see its grade history</p>
+<BySubjectStudentGradeHistory ClassesIds="classesIds" />
+
+@code {
+    private List<Class> classes = new List<Class>();
+    private List<int> classesIds = new List<int>();
+    private string studentId = string.Empty;
+    private HttpClient _httpClient;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _httpClient = HttpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
+        await LoadTeacherClasses();
+    }
+
+    private async Task LoadTeacherClasses()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            studentId = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+            if (!string.IsNullOrEmpty(studentId))
+            {
+                try
+                {
+                    classes = await _httpClient.GetFromJsonAsync<List<Class>>($"classes/student/{studentId}");
+                    classesIds = classes
+                                    .Select(c => c.Id)
+                                    .OrderBy(c => c)
+                                    .ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error fetching classes: {ex.Message}");
+                    classes = new List<Class>();
+                }
+            }
+        }
+    }
+}
