@@ -81,4 +81,32 @@ public class GradeService(ApplicationDbContext context) : IGradeService
 
         return grade;
     }
+
+    public async Task<List<Grade>> GetClassGradesHistory(int classId)
+    {
+        var grades = await context.Grades
+            .Where(g => g.CourseId == classId)
+            .ToListAsync();
+
+        if (grades == null || grades.Count == 0)
+        {
+            throw new Exception("No grades for this class");
+        }
+
+        return grades;
+    }
+
+    public async Task<List<Grade>> GetStudentGradesHistory(string studentId)
+    {
+        var grades = await context.Grades
+            .Where(g => g.StudentId == studentId)
+            .ToListAsync();
+
+        if (grades == null || grades.Count == 0)
+        {
+            throw new Exception("No grades for this class");
+        }
+
+        return grades;
+    }
 }
