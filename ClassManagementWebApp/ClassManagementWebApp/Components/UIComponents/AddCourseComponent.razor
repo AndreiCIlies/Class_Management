@@ -1,0 +1,124 @@
+﻿@using ClassManagementWebApp.Security
+@using Microsoft.IdentityModel.JsonWebTokens
+@using ClassManagementWebApp.DTO
+
+@inject JWTAuthenticationStateProvider AuthStateProvider
+@inject IAccessTokenService AccessTokenService
+
+@if(isShowing)
+{
+    <div class="modal fade show d-block" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog" style="border-radius:15px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="()=> ClosePopup(false)" />
+                </div>
+                <div class="modal-body">
+                    <div class="form-group m-2">
+                        <label for="courseName">Course Name</label>
+                        <input type="text" id="courseName" class="form-control" @bind="courseName" />
+                        @if (!isCourseNameValid)
+                        {
+                            <div class="text-danger">Course name is required.</div>
+                        }
+                    </div>
+
+                    <div class="form-group m-2">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate" class="form-control" @bind="startDate" />
+                        @if (!isStartDateValid)
+                        {
+                            <div class="text-danger">Start date is required.</div>
+                        }
+                    </div>
+
+                    <div class="form-group m-2">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate" class="form-control" @bind="endDate" />
+                        @if (!isEndDateValid)
+                        {
+                            <div class="text-danger">End date is required.</div>
+                        }
+                    </div>
+
+                    <button class="btn btn-primary m-2" @onclick="SaveCourse">
+                        Add Class
+                    </button>
+                    <button class="btn btn-secondary m-2" @onclick="()=> ClosePopup(false)">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<h3>AddGroupComponent</h3>
+
+@code {
+    [Parameter]
+    public Func<Class, Task> OnConfirmationChanged { get; set; }
+
+    private bool isShowing = false;
+    private string courseName = string.Empty;
+    private bool isCourseNameValid = true;
+    private DateTime startDate;
+    private bool isStartDateValid = true;
+    private DateTime endDate;
+    private bool isEndDateValid = true;
+
+    public void Show()
+    {
+        isShowing = true;
+        StateHasChanged();
+    }
+
+    public void ClosePopup(bool value)
+    {
+        isShowing = value;
+        Reset();
+        StateHasChanged();
+    }
+
+    public void Reset()
+    {
+        courseName = string.Empty;
+        startDate = default;
+        endDate = default;
+        isCourseNameValid = true;
+        isStartDateValid = true;
+        isEndDateValid = true;
+    }
+
+    private async Task SaveCourse()
+    {
+        isCourseNameValid = !string.IsNullOrWhiteSpace(courseName);
+        isStartDateValid = startDate != default;
+        isEndDateValid = endDate != default;
+
+        if (!isCourseNameValid || !isStartDateValid || !isEndDateValid)
+        {
+            StateHasChanged();
+            return;
+        }
+
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        string id = string.Empty;
+        if (user.Identity.IsAuthenticated)
+        {
+            var token = await AccessTokenService.GetToken();
+            id = user.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+        }
+
+        var newClass = new Class
+        {
+                Name = courseName,
+                TeacherId = id,
+                StartDate = startDate,
+                EndDate = endDate
+        };
+        await OnConfirmationChanged?.Invoke(newClass);
+        ClosePopup(false);
+    }
+}
