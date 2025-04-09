@@ -81,4 +81,49 @@ public class GradeService(ApplicationDbContext context) : IGradeService
 
         return grade;
     }
+
+    public async Task<List<Grade>> GetClassGradesHistory(int classId)
+    {
+        var grades = await context.Grades
+            .Where(g => g.CourseId == classId)
+            .OrderByDescending(g => g.DateAssigned)
+            .ToListAsync();
+
+        if (grades == null || grades.Count == 0)
+        {
+            return new List<Grade>();
+        }
+
+        return grades;
+    }
+
+    public async Task<List<Grade>> GetClassStudentGradesHistory(int classId, string studentId)
+    {
+        var grades = await context.Grades
+            .Where(g => g.CourseId == classId && g.StudentId == studentId)
+            .OrderByDescending(g => g.DateAssigned)
+            .ToListAsync();
+
+        if (grades == null || grades.Count == 0)
+        {
+            return new List<Grade>();
+        }
+
+        return grades;
+    }
+
+    public async Task<List<Grade>> GetStudentGradesHistory(string studentId)
+    {
+        var grades = await context.Grades
+            .Where(g => g.StudentId == studentId)
+            .OrderByDescending(g => g.DateAssigned)
+            .ToListAsync();
+
+        if (grades == null || grades.Count == 0)
+        {
+            return new List<Grade>();
+        }
+
+        return grades;
+    }
 }

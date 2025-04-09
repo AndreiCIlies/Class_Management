@@ -1,0 +1,106 @@
+﻿@inject IHttpClientFactory HttpClientFactory
+
+<select @bind="selectedClassId">
+    <option value="0">-- Select Class --</option>
+    @foreach (var classObj in Classes)
+    {
+        <option value="@classObj.Id">@classObj.Name</option>
+    }
+</select>
+
+<button @onclick="FetchGradeHistory">View</button>
+
+<button @onclick="ToggleGradeHistoryVisibility">
+    @(isGradeHistoryVisible ? "Hide" : "Show") Grades History
+</button>
+
+@if (isGradeHistoryVisible && gradesHistory != null && gradesHistory.Any())
+{
+    <br />
+    <table class="table table-striped table-bordered">
+        <thead class="table-success text-center">
+            <tr>
+                <th>Student</th>
+                <th>Grade</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var grade in gradesHistory)
+            {
+                <tr class="text-center">
+                    <td>@($"{grade.Student?.FirstName} {grade.Student?.LastName}")</td>
+                    <td>@grade.Value</td>
+                    <td>@grade.DateAssigned.ToString("dd/MM/yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (isGradeHistoryVisible && (gradesHistory == null || !gradesHistory.Any()))
+{
+    <p>No grades available for the selected class.</p>
+}
+else if (gradesHistory == null || !gradesHistory.Any())
+{
+    <p>No grades available for the selected class.</p>
+}
+
+@code {
+    [Parameter] public List<int> ClassesIds { get; set; } = new List<int>();
+    private List<Class> Classes { get; set; } = new List<Class>();
+    private int selectedClassId = 0;
+    private List<Grade> gradesHistory = new List<Grade>();
+    private bool isGradeHistoryVisible = true;
+    private HttpClient _httpClient;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _httpClient = HttpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
+    
+        try
+        {
+            var classes = await _httpClient.GetFromJsonAsync<List<Class>>("classes");
+            Classes = classes.Where(c => ClassesIds.Contains(c.Id)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching classes: {ex.Message}");
+            Classes = new List<Class>();
+        }
+    }
+
+    private async Task FetchGradeHistory()
+    {
+        if (selectedClassId == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            gradesHistory = await _httpClient.GetFromJsonAsync<List<Grade>>($"grades/class/{selectedClassId}/history");
+
+            if (gradesHistory == null || !gradesHistory.Any())
+            {
+                gradesHistory = new List<Grade>();
+            }
+
+            foreach (var grade in gradesHistory)
+			{
+				Student student = await _httpClient.GetFromJsonAsync<Student>($"students/{grade.StudentId}");
+                grade.Student = student;
+			}
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching grade history: {ex.Message}");
+            gradesHistory = new List<Grade>();
+        }
+    }
+
+    private void ToggleGradeHistoryVisibility()
+    {
+        isGradeHistoryVisible = !isGradeHistoryVisible;
+    }
+}
