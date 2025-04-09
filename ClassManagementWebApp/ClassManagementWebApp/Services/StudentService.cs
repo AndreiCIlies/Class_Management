@@ -30,6 +30,28 @@ public class StudentService(IHttpClientFactory httpClientFactory) : IStudentServ
         return null;
     }
 
+    public async Task<List<Class>> GetStudentClassesAsync(string studentId)
+    {
+        var response = await _httpClient.GetAsync($"Classes/student/{studentId}");
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<List<Class>>(content) ?? [];
+        }
+        return [];
+    }
+
+    public async Task<List<Grade>> GetStudentGradesAsync(string studentId)
+    {
+        var response = await _httpClient.GetAsync($"Grades/student/{studentId}");
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<List<Grade>>(content) ?? [];
+        }
+        return [];
+    }
+
     public async Task UpdateStudentAsync(Student student)
     {
         var response = await _httpClient.PutAsJsonAsync($"students/{student.Id}", student);

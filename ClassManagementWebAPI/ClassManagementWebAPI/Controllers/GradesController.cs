@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ClassManagementWebAPI.Models;
+using static GradeService;
 namespace ClassManagementWebAPI.Controllers;
+
+
 
 [ApiController]
 [Route("api/[controller]")]
@@ -69,6 +72,17 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         }
     }
 
+    [HttpGet("student/{studentId}")]
+    public async Task<IActionResult> GetGradesByStudent(string studentId)
+    {
+        var grades = await gradeService.GetGradesByStudentIdAsync(studentId);
+        if (grades == null || !grades.Any())
+        {
+            return NotFound();
+        }
+        return Ok(grades);
+    }
+
     // DTO pentru request
     public class AssignGradeRequest
     {
@@ -77,5 +91,44 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         public double Value { get; set; }
         public string TeacherId { get; set; }
     }
+    [HttpPost("multiple-grades")]
+    public async Task<IActionResult> AddGradesToStudent([FromBody] AddGradesToStudentRequest request)
+    {
+        try
+        {
+            var grades = await gradeService.AddGradesToStudentAsync(
+                request.StudentId,
+                request.CourseId,
+                request.Values
+            );
+            return Ok(grades);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
+
+
+    [HttpGet("class/{classId}/history")]
+    public async Task<IActionResult> GetClassGradesHistory(int classId)
+    {
+        var grades = await gradeService.GetClassGradesHistory(classId);
+        return Ok(grades);
+    }
+
+    [HttpGet("class/{classId}/{studentId}/history")]
+    public async Task<IActionResult> GetClassStudentGradesHistory(int classId, string studentId)
+    {
+        var grades = await gradeService.GetClassStudentGradesHistory(classId, studentId);
+        return Ok(grades);
+    }
+
+    [HttpGet("student/{studentId}/history")]
+    public async Task<IActionResult> GetStudentGradesHistory(string studentId)
+    {
+        var grades = await gradeService.GetStudentGradesHistory(studentId);
+        return Ok(grades);
+    }
 }

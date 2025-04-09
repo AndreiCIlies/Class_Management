@@ -43,6 +43,8 @@
             }
         </tbody>
     </table>
+
+    <StudentGradeHistory />
 }
 else
 {
@@ -67,7 +69,7 @@ else
 
     public void OnSelectCourse(Class course)
     {
-        courseComponent.ShowCourseInfo(course, student.Id);
+        courseComponent.ShowCourseInfo(course, student.Grades, student.Id);
     }
 
     public async void InitializeStudent()
@@ -81,165 +83,9 @@ else
 
             student = await StudentService.GetStudentByIdAsync(studentId);
 
-            //-----------------DELETE THIS WHEN THE CHANGES ARE MADE IN THE BACKEND-----------------
+            student.Classes = await StudentService.GetStudentClassesAsync(studentId);
+            student.Grades = await StudentService.GetStudentGradesAsync(studentId);
 
-            // var teacher = await TeacherService.GetTeacherByIdAsync("fede8ae2-6da5-4387-8d3e-107b6dab0bf0");
-
-            // student.Classes = [
-            //     new Class
-            //     {
-            //         Id = 1,
-            //         Name = "Math",
-            //         StartDate = new DateTime(2025, 1, 1),
-            //         EndDate = new DateTime(2025, 6, 1),
-            //         TeacherId = "fede8ae2-6da5-4387-8d3e-107b6dab0bf0",
-            //         Teacher = teacher,
-            //         Grades = [
-            //             new Grade
-            //             {
-            //                 Id = 1,
-            //                 StudentId = studentId,
-            //                 CourseId = 1,
-            //                 Value = 90,
-            //                 DateAssigned = new DateTime(2025, 1, 1)
-            //             },
-            //             new Grade
-            //             {
-            //                 Id = 3,
-            //                 StudentId = studentId,
-            //                 CourseId = 1,
-            //                 Value = 95,
-            //                 DateAssigned = new DateTime(2025, 1, 1)
-            //             },
-            //             new Grade
-            //             {
-            //                 Id = 5,
-            //                 StudentId = studentId,
-            //                 CourseId = 1,
-            //                 Value = 100,
-            //                 DateAssigned = new DateTime(2025, 1, 1)
-            //             },
-            //             new Grade
-            //             {
-            //                 Id = 7,
-            //                 StudentId = studentId,
-            //                 CourseId = 1,
-            //                 Value = 85,
-            //                 DateAssigned = new DateTime(2025, 1, 1)
-            //             }
-            //         ]
-            //     },
-            //     new Class
-            //     {
-            //         Id = 2,
-            //         Name = "Science",
-            //         StartDate = new DateTime(2025, 1, 1),
-            //         EndDate = new DateTime(2025, 6, 1),
-            //         TeacherId = "fede8ae2-6da5-4387-8d3e-107b6dab0bf0",
-            //         Teacher = teacher,
-            //         Grades = [
-            //             new Grade
-            //             {
-            //                 Id = 2,
-            //                 StudentId = studentId,
-            //                 CourseId = 2,
-            //                 Value = 85,
-            //                 DateAssigned = new DateTime(2025, 2, 1)
-            //             },
-            //             new Grade
-            //             {
-            //                 Id = 4,
-            //                 StudentId = studentId,
-            //                 CourseId = 2,
-            //                 Value = 80,
-            //                 DateAssigned = new DateTime(2025, 2, 10)
-            //             },
-            //             new Grade
-            //             {
-            //                 Id = 6,
-            //                 StudentId = studentId,
-            //                 CourseId = 2,
-            //                 Value = 75,
-            //                 DateAssigned = new DateTime(2025, 3, 10)
-            //             },
-            //             new Grade
-            //             {
-            //                 Id = 8,
-            //                 StudentId = studentId,
-            //                 CourseId = 2,
-            //                 Value = 90,
-            //                 DateAssigned = new DateTime(2025, 4, 22)
-            //             }
-            //         ]
-            //     }
-            // ];
-
-            // student.Grades = [
-            //     new Grade
-            //     {
-            //         Id = 1,
-            //         StudentId = studentId,
-            //         CourseId = 1,
-            //         Value = 90,
-            //         DateAssigned = new DateTime(2025, 1, 1)
-            //     },
-            //     new Grade
-            //     {
-            //         Id = 2,
-            //         StudentId = studentId,
-            //         CourseId = 2,
-            //         Value = 85,
-            //         DateAssigned = new DateTime(2025, 2, 1)
-            //     },
-            //     new Grade
-            //     {
-            //         Id = 3,
-            //         StudentId = studentId,
-            //         CourseId = 1,
-            //         Value = 95,
-            //         DateAssigned = new DateTime(2025, 1, 1)
-            //     },
-            //     new Grade
-            //     {
-            //         Id = 4,
-            //         StudentId = studentId,
-            //         CourseId = 2,
-            //         Value = 80,
-            //         DateAssigned = new DateTime(2025, 2, 10)
-            //     },
-            //     new Grade
-            //     {
-            //         Id = 5,
-            //         StudentId = studentId,
-            //         CourseId = 1,
-            //         Value = 100,
-            //         DateAssigned = new DateTime(2025, 1, 1)
-            //     },
-            //     new Grade
-            //     {
-            //         Id = 6,
-            //         StudentId = studentId,
-            //         CourseId = 2,
-            //         Value = 75,
-            //         DateAssigned = new DateTime(2025, 3, 10)
-            //     },
-            //     new Grade
-            //     {
-            //         Id = 7,
-            //         StudentId = studentId,
-            //         CourseId = 1,
-            //         Value = 85,
-            //         DateAssigned = new DateTime(2025, 1, 1)
-            //     },
-            //     new Grade
-            //     {
-            //         Id = 8,
-            //         StudentId = studentId,
-            //         CourseId = 2,
-            //         Value = 90,
-            //         DateAssigned = new DateTime(2025, 4, 22)
-            //     }
-            // ];
             foreach (var course in student.Classes)
             {
                 if (course.EndDate > DateTime.Now)
