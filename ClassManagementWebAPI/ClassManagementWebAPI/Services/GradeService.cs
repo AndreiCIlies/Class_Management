@@ -155,4 +155,10 @@ public class GradeService(ApplicationDbContext context) : IGradeService
         return grades;
     }
 
-} 
+    public Task<List<Grade>> GetGradesByStudentIdAsync(string studentId)
+    {
+        return context.Grades
+            .Where(g => g.StudentId == studentId)
+            .ToListAsync();
+    }
+}

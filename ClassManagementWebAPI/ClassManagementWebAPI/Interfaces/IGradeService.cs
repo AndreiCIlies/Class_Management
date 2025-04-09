@@ -12,4 +12,5 @@ public interface IGradeService
     Task<List<Grade>> GetClassGradesHistory(int classId);
     Task<List<Grade>> GetClassStudentGradesHistory(int classId, string studentId);
     Task<List<Grade>> GetStudentGradesHistory(string studentId);
+    Task<List<Grade>> GetGradesByStudentIdAsync(string studentId);
 }

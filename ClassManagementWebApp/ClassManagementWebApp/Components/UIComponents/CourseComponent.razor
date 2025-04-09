@@ -39,13 +39,19 @@
 
     private bool isSelected { get; set; }
 
-    public void ShowCourseInfo(Class course, string studentId)
+    public void ShowCourseInfo(Class course, List<Grade> grades, string studentId)
     {
         Grades = new List<Grade>();
         Course = course;
-        foreach (var grade in course.Grades)
+        if (grades == null || grades.Count == 0)
         {
-            if (grade.StudentId == studentId)
+            Average = 0;
+            isSelected = true;
+            return;
+        }
+        foreach (var grade in grades)
+        {
+            if (grade.CourseId == Course.Id)
                 Grades.Add(grade);
         }
         Average = Grades.Average(x => x.Value);

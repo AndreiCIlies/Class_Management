@@ -14,5 +14,4 @@ public interface IClassService
     Task<List<Class>> GetTeacherClassesAsync(string teacherId);
     Task<List<Class>> GetStudentClassesAsync(string studentId);
     Task<List<Student>> GetStudentsInClassAsync(int classId);
-
 }
