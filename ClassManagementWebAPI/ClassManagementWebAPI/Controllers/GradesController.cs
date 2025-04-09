@@ -80,7 +80,7 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         public double Value { get; set; }
         public string TeacherId { get; set; }
     }
-    [HttpPost("multiple grades")]
+    [HttpPost("multiple-grades")]
     public async Task<IActionResult> AddGradesToStudent([FromBody] AddGradesToStudentRequest request)
     {
         try
