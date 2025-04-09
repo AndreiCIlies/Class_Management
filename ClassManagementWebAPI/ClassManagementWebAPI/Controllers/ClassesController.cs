@@ -79,6 +79,18 @@ public class ClassesController(IClassService classService) : ControllerBase
         }
         return Ok(classes);
     }
+
+    [HttpGet("student/{studentId}")]
+    public async Task<IActionResult> GetStudentClasses(string studentId)
+    {
+        var classes = await classService.GetStudentClassesAsync(studentId);
+        if (classes == null || classes.Count == 0)
+        {
+            return NotFound($"No classes found for student with ID {studentId}");
+        }
+        return Ok(classes);
+    }
+
     [HttpGet("{classId}/students")]
     public async Task<IActionResult> GetStudentsInClass(int classId)
     {
