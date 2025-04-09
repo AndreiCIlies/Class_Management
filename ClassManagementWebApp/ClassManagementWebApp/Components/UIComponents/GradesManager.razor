@@ -4,6 +4,7 @@
 @inject IGradeService GradeService
 @inject IClassService ClassService
 @inject NavigationManager Nav
+@using ClassManagementWebApp.DTO
 
 <h3><b>Grades Manager</b></h3>
 <p>Manage the grades of the students in this course.</p>
@@ -44,12 +45,26 @@ else
                     <td>
                         <input type="number" min="0" max="100" @bind="newGrade[student.Id]" />
                         <button @onclick="() => AddGrade(student.Id)">Add Grade</button>
+                        <button @onclick="() => OpenMultipleGradeDialog(student.Id)">Multiple Grades</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
     <br />
+}
+@if (showDialog)
+{
+    <div style="background-color:rgba(0,0,0,0.5);position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">
+        <div style="background:white;padding:20px;border-radius:10px;min-width:300px;">
+            <h5>Add Multiple Grades</h5>
+            <p>Enter grades separated by comma or space:</p>
+            <input @bind="multipleGradesInput" class="form-control" />
+            <br />
+            <button class="btn btn-success" @onclick="SubmitMultipleGrades">Submit</button>
+            <button class="btn btn-secondary" @onclick="() => showDialog = false">Cancel</button>
+        </div>
+    </div>
 }
 
 <button @onclick="GoBack">Go back</button>
@@ -59,6 +74,9 @@ else
     private List<Student> students = new();
     private Dictionary<string, List<int>> grades = new();
     private Dictionary<string, int> newGrade = new();
+    private bool showDialog = false;
+    private string selectedStudentId;
+    private string multipleGradesInput = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,6 +130,74 @@ else
         }
 
         StateHasChanged();
+    }
+    private void OpenMultipleGradeDialog(string studentId)
+    {
+        selectedStudentId = studentId;
+        multipleGradesInput = "";
+        showDialog = true;
+    }
+
+    private async Task SubmitMultipleGrades()
+    {
+        if (string.IsNullOrWhiteSpace(multipleGradesInput) || string.IsNullOrEmpty(selectedStudentId)) return;
+
+        var separators = new[] { ',', ' ' };
+        var gradeStrings = multipleGradesInput.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+        var gradeValues = new List<int>(); 
+
+        foreach (var gradeStr in gradeStrings)
+        {
+            if (int.TryParse(gradeStr, out int value) && value >= 1 && value <= 100)
+            {
+                gradeValues.Add(value);
+            }
+
+        }
+
+        if (gradeValues.Count > 0)
+        {
+            var request = new AddGradesToStudentRequest
+                {
+                    StudentId = selectedStudentId,
+                    CourseId = ClassId,     
+                    Values = gradeValues      
+                };
+
+            try
+            {
+                var addedGrades = await GradeService.AddMultipleGradesAsync(request);
+                var student = students.FirstOrDefault(s => s.Id == selectedStudentId);
+                if (student != null)
+                {
+                    foreach (var grade in addedGrades)
+                    {
+                        student.Grades.Add(grade);
+                        if (grades.ContainsKey(selectedStudentId))
+                        {
+                            grades[selectedStudentId].Add(grade.Value);
+                        }
+                    }
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                // Loghează eroarea HTTP detaliată
+                Console.WriteLine($"HTTP Request Error: {httpEx.Message}");
+                // Poți afișa un mesaj de eroare utilizatorului
+            }
+            catch (Exception ex)
+            {
+              
+                Console.WriteLine($"General Error: {ex.Message}");
+                
+            }
+        }
+
+        // Resetează și închide dialogul
+        multipleGradesInput = "";
+        showDialog = false;
+        StateHasChanged(); // Asigură re-renderizarea componentei
     }
 
     private void GoBack()

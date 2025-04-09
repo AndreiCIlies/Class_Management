@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ClassManagementWebAPI.Models;
+using static GradeService;
 namespace ClassManagementWebAPI.Controllers;
+
+
 
 [ApiController]
 [Route("api/[controller]")]
@@ -77,6 +80,25 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         public double Value { get; set; }
         public string TeacherId { get; set; }
     }
+    [HttpPost("multiple-grades")]
+    public async Task<IActionResult> AddGradesToStudent([FromBody] AddGradesToStudentRequest request)
+    {
+        try
+        {
+            var grades = await gradeService.AddGradesToStudentAsync(
+                request.StudentId,
+                request.CourseId,
+                request.Values
+            );
+            return Ok(grades);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+
 
     [HttpGet("class/{classId}/history")]
     public async Task<IActionResult> GetClassGradesHistory(int classId)
