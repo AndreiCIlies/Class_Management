@@ -5,9 +5,9 @@
 
 <select @bind="selectedClassId">
     <option value="0">-- Select Class --</option>
-    @foreach (var classId in ClassesIds)
+    @foreach (var classObj in Classes)
     {
-        <option value="@classId">@classId</option>
+        <option value="@classObj.Id">@classObj.Name</option>
     }
 </select>
 
@@ -20,7 +20,6 @@
 @if (isGradeHistoryVisible && gradesHistory != null && gradesHistory.Any())
 {
     <br />
-    <h4>Grades History for Class @selectedClassId</h4>
     <table class="table table-striped table-bordered">
         <thead class="table-success text-center">
             <tr>
@@ -50,6 +49,7 @@ else if (gradesHistory == null || !gradesHistory.Any())
 
 @code {
     [Parameter] public List<int> ClassesIds { get; set; } = new List<int>();
+    private List<Class> Classes { get; set; } = new List<Class>();
     private int selectedClassId = 0;
     private string studentId = string.Empty;
     private List<Grade> gradesHistory = new List<Grade>();
@@ -61,6 +61,7 @@ else if (gradesHistory == null || !gradesHistory.Any())
         _httpClient = HttpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
         var state = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = state.User;
+
         if (user.Identity.IsAuthenticated)
 		{
 			studentId = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
@@ -70,12 +71,13 @@ else if (gradesHistory == null || !gradesHistory.Any())
 				try
 				{
 					var classes = await _httpClient.GetFromJsonAsync<List<Class>>($"classes/student/{studentId}");
-					ClassesIds = classes.Select(c => c.Id).OrderBy(c => c).ToList();
+                    Classes = classes.OrderBy(c => c.Name).ToList();
+                    ClassesIds = Classes.Select(c => c.Id).ToList();
 				}
 				catch (Exception ex)
 				{
 					Console.WriteLine($"Error fetching classes: {ex.Message}");
-					ClassesIds = new List<int>();
+					Classes = new List<Class>();
 				}
 			}
 		}

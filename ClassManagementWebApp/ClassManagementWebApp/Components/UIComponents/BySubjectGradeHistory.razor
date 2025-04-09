@@ -2,9 +2,9 @@
 
 <select @bind="selectedClassId">
     <option value="0">-- Select Class --</option>
-    @foreach (var classId in ClassesIds)
+    @foreach (var classObj in Classes)
     {
-        <option value="@classId">@classId</option>
+        <option value="@classObj.Id">@classObj.Name</option>
     }
 </select>
 
@@ -17,7 +17,6 @@
 @if (isGradeHistoryVisible && gradesHistory != null && gradesHistory.Any())
 {
     <br />
-    <h4>Grades History for Class @selectedClassId</h4>
     <table class="table table-striped table-bordered">
         <thead class="table-success text-center">
             <tr>
@@ -49,6 +48,7 @@ else if (gradesHistory == null || !gradesHistory.Any())
 
 @code {
     [Parameter] public List<int> ClassesIds { get; set; } = new List<int>();
+    private List<Class> Classes { get; set; } = new List<Class>();
     private int selectedClassId = 0;
     private List<Grade> gradesHistory = new List<Grade>();
     private bool isGradeHistoryVisible = true;
@@ -57,6 +57,17 @@ else if (gradesHistory == null || !gradesHistory.Any())
     protected override async Task OnInitializedAsync()
     {
         _httpClient = HttpClientFactory.CreateClient("ClassManagementWebApp.ServerAPI");
+    
+        try
+        {
+            var classes = await _httpClient.GetFromJsonAsync<List<Class>>("classes");
+            Classes = classes.Where(c => ClassesIds.Contains(c.Id)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching classes: {ex.Message}");
+            Classes = new List<Class>();
+        }
     }
 
     private async Task FetchGradeHistory()
