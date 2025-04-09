@@ -121,12 +121,5 @@ namespace ClassManagementWebAPI.Services
                 await context.SaveChangesAsync();
             }
         }
-
-        public Task<List<Class>> GetStudentClassesAsync(string studentId)
-        {
-            return context.Classes
-                .Where(c => c.Students.Any(s => s.Id == studentId))
-                .ToListAsync();
-        }
     }
 }
