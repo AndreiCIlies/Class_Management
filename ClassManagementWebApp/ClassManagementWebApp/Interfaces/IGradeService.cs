@@ -8,4 +8,5 @@ public interface IGradeService
     Task UpdateGradeAsync(Grade grade);
     Task DeleteGradeAsync(int id);
     Task<List<Grade>> AddMultipleGradesAsync(AddGradesToStudentRequest request);
+    Task<bool> AddGradesToMultipleStudents(AddGradesToMultipleStudents request);
 }

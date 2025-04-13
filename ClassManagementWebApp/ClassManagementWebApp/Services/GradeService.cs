@@ -78,4 +78,10 @@ public class GradeService(IHttpClientFactory httpClientFactory) : IGradeService
             throw; 
         }
     }
+
+    public async Task<bool> AddGradesToMultipleStudents(AddGradesToMultipleStudents request)
+    {
+        var response = await _httpClient.PostAsJsonAsync("grades/grades-to-multiple-students", request);
+        return response.IsSuccessStatusCode;
+    }
 }
