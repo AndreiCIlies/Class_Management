@@ -91,6 +91,7 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         public double Value { get; set; }
         public string TeacherId { get; set; }
     }
+
     [HttpPost("multiple-grades")]
     public async Task<IActionResult> AddGradesToStudent([FromBody] AddGradesToStudentRequest request)
     {
@@ -109,7 +110,26 @@ public class GradesController(IGradeService gradeService) : ControllerBase
         }
     }
 
-
+    [HttpPost("grades-to-multiple-students")]
+    public async Task<IActionResult> AddGradesToMultipleStudent([FromBody] AddGradesToMultipleStudents request)
+    {
+        try
+        {
+            foreach(var student in request.Grades)
+            {
+                await gradeService.AddGradesToStudentAsync(
+                   student.Key,
+                   request.CourseId,
+                   student.Value
+                   );
+            }
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
     [HttpGet("class/{classId}/history")]
     public async Task<IActionResult> GetClassGradesHistory(int classId)

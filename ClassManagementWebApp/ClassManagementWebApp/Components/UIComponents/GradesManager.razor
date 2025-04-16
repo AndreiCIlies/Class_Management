@@ -6,6 +6,18 @@
 @inject NavigationManager Nav
 @using ClassManagementWebApp.DTO
 
+<div style="float:right; background-color: lightgray; padding: 10px; border-radius: 5px; display: inline-block; cursor: pointer;">
+    <label style="margin: 0;">
+        <InputFile OnChange="@HandleFileSelected" style="display:none" accept=".csv" />
+        <span style="cursor: pointer;">📂 Import CSV</span>
+    </label>
+</div>
+<div class="text-danger" style="float:right; margin-right: 10px; padding: 10px; display: inline-block;">
+    <span>@CSVError</span>
+</div>
+
+<br />
+<br />
 <h3><b>Grades Manager</b></h3>
 <p>Manage the grades of the students in this course.</p>
 
@@ -30,7 +42,7 @@ else
         <tbody>
             @foreach (var student in students)
             {
-                <tr class ="text-center">
+                <tr class="text-center">
                     <td>@student.Email</td>
                     <td>
                         @if (grades[student.Id] != null)
@@ -78,6 +90,9 @@ else
     private string selectedStudentId;
     private string multipleGradesInput = "";
 
+    private string fileName = string.Empty;
+    private string CSVError = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         var teacherClass = await ClassService.GetClassByIdAsync(ClassId);
@@ -95,7 +110,7 @@ else
                     grades[student.Id].Add(grade.Value);
                 }
 
-                newGrade[student.Id] = 0; 
+                newGrade[student.Id] = 0;
             }
         }
     }
@@ -110,12 +125,12 @@ else
         var gradeValue = newGrade[studentId];
 
         var grade = new Grade
-        {
-            StudentId = studentId,
-            CourseId = ClassId,
-            Value = gradeValue,
-            DateAssigned = DateTime.UtcNow
-        };
+            {
+                StudentId = studentId,
+                CourseId = ClassId,
+                Value = gradeValue,
+                DateAssigned = DateTime.UtcNow
+            };
 
         await GradeService.CreateGradeAsync(grade);
 
@@ -144,7 +159,7 @@ else
 
         var separators = new[] { ',', ' ' };
         var gradeStrings = multipleGradesInput.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-        var gradeValues = new List<int>(); 
+        var gradeValues = new List<int>();
 
         foreach (var gradeStr in gradeStrings)
         {
@@ -160,8 +175,8 @@ else
             var request = new AddGradesToStudentRequest
                 {
                     StudentId = selectedStudentId,
-                    CourseId = ClassId,     
-                    Values = gradeValues      
+                    CourseId = ClassId,
+                    Values = gradeValues
                 };
 
             try
@@ -188,9 +203,9 @@ else
             }
             catch (Exception ex)
             {
-              
+
                 Console.WriteLine($"General Error: {ex.Message}");
-                
+
             }
         }
 
@@ -198,6 +213,76 @@ else
         multipleGradesInput = "";
         showDialog = false;
         StateHasChanged(); // Asigură re-renderizarea componentei
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null && file.Name.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+        {
+            fileName = file.Name;
+
+            using var reader = new StreamReader(file.OpenReadStream());
+            var content = await reader.ReadToEndAsync();
+
+            var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+            if (lines.Length < 2)
+            {
+                return;
+            }
+
+            var headers = lines[0].Trim().Split(',', StringSplitOptions.TrimEntries);
+
+            if (headers.Any(h => !students.Any(s => h == $"{s.LastName} {s.FirstName}")))
+            {
+                CSVError = "The CSV file contains students that are not in the class.";
+                return;
+            }
+
+            var dataDict = new Dictionary<string, List<int>>();
+
+            foreach (var header in headers)
+            {
+                dataDict[students.FirstOrDefault(s => $"{s.LastName} {s.FirstName}" == header).Id] = new List<int>();
+            }
+
+            for (int i = 1; i < lines.Length; i++)
+            {
+                var row = lines[i].Trim().Split(',', StringSplitOptions.TrimEntries);
+
+                for (int j = 0; j < headers.Length && j < row.Length; j++)
+                {
+                    var student = students.FirstOrDefault(s => $"{s.LastName} {s.FirstName}" == headers[j]);
+                    if (int.TryParse(row[j], out int value))
+                    {
+                        dataDict[student.Id].Add(value);
+                    }
+                }
+            }
+
+            var request = new AddGradesToMultipleStudents
+            {
+                CourseId = ClassId,
+                Grades = dataDict
+            };
+
+            var result = await GradeService.AddGradesToMultipleStudents(request);
+            if(result)
+            {
+                foreach (var studentGrades in dataDict)
+                {
+                    grades[studentGrades.Key].AddRange(studentGrades.Value);
+                }
+            }
+
+        }
+        else
+        {
+            fileName = null;
+        }
+        StateHasChanged();
     }
 
     private void GoBack()
