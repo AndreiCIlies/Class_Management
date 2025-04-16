@@ -340,5 +340,4 @@ public class GradesControllerTests
         Assert.AreEqual(mockGrades, okResult.Value);
         await gradesService.Received(1).GetStudentGradesHistory(studentId);
     }
-
 }
