@@ -245,7 +245,7 @@ else
 
             foreach (var header in headers)
             {
-                dataDict[header] = new List<int>();
+                dataDict[students.FirstOrDefault(s => $"{s.LastName} {s.FirstName}" == header).Id] = new List<int>();
             }
 
             for (int i = 1; i < lines.Length; i++)
