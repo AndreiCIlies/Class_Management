@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassManagementWebAPI", "Cl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassManagementWebAPI.UnitTests", "ClassManagementWebAPI.UnitTests\ClassManagementWebAPI.UnitTests.csproj", "{841A5284-847F-43BF-B2C5-9A1041EC94A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassManagementWebAPI.IntegrationTests", "ClassManagementWebAPI.IntegrationTests\ClassManagementWebAPI.IntegrationTests.csproj", "{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{841A5284-847F-43BF-B2C5-9A1041EC94A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{841A5284-847F-43BF-B2C5-9A1041EC94A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{841A5284-847F-43BF-B2C5-9A1041EC94A1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95E172F6-F5E1-40C2-8B5E-74E70AE24F9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
