@@ -17,6 +17,9 @@
 }
 
 <h3><b>My Classes</b></h3>
+<h3><b>Classes</b></h3>
+
+<p>Choose a class and go to its gradebook.</p>
 
 @if (classes == null)
 {
@@ -39,6 +42,31 @@ else
     </div>
 }
 
+<br/>
+<h3><b>Classes</b></h3>
+
+<p>Choose a class and go to students manager.</p>
+
+@if (classes == null)
+{
+    <p>Loading...</p>
+}
+else if (classes.Count == 0)
+{
+    <p>No classes found.</p>
+}
+else
+{
+    <div>
+        @foreach (var classItem in classes)
+        {
+            <button class="btn btn-primary m-2" @onclick="() => NavigateToStudents(classItem.Id)">
+                @classItem.Name
+            </button>
+            <br/>
+        }
+    </div>
+}
 <AddCourseComponent OnConfirmationChanged="OnClassAdded" @ref="addCourseComponent" />
 
 @code {
@@ -82,6 +110,11 @@ else
     private void NavigateToGrades(int classId)
     {
         Nav.NavigateTo($"/grades/{classId}");
+    }
+
+    private void NavigateToStudents(int classId)
+    {
+        Nav.NavigateTo($"/students/{classId}");
     }
 
     private void ShowAddGroupComponent()

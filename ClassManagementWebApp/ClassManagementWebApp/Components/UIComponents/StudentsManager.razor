@@ -1,0 +1,122 @@
+﻿@page "/students/{classId:int}"
+@rendermode InteractiveServer
+
+@inject IClassService ClassService
+@inject IStudentService StudentService
+@inject NavigationManager Nav
+
+<h3><b>Students Manager</b></h3>
+<p>Manage the students in this course.</p>
+
+@if (students == null)
+{
+    <p>Loading students...</p>
+}
+else if (!students.Any())
+{
+    <p>No students found for this class.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-success text-center">
+            <tr>
+                <th>Student Email</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr class="text-center">
+                    <td>@student.Email</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="async () => await RemoveStudent(student.Email)">Remove</button>
+					</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<br/>
+<input type="text" class="form-control w-50 d-inline"  placeholder="Student Email" @bind="studentEmail" required />
+<button class="btn btn-success ms-2" @onclick="async () => await AddStudent()">Add Student</button>
+<br/>
+<br/>
+<br/>
+<button @onclick="GoBack">Go back</button>
+
+@code {
+    [Parameter] public int ClassId { get; set; }
+    private List<Student> students = new();
+    private string studentEmail = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var teacherClass = await ClassService.GetClassByIdAsync(ClassId);
+
+        if (teacherClass != null)
+        {
+            var studentsList = await ClassService.GetStudentsInClassAsync(ClassId);
+            students = studentsList.OrderBy(s => s.Email).ToList();
+        }
+    }
+
+    private async Task AddStudent()
+    {
+        if (string.IsNullOrWhiteSpace(studentEmail))
+        {
+            Console.WriteLine("Missing required fields.");
+            return;
+        }
+
+        var studentsInCourse = await ClassService.GetStudentsInClassAsync(ClassId);
+
+        if (studentsInCourse.Any(s => s.Email.Equals(studentEmail, StringComparison.OrdinalIgnoreCase)))
+        {
+			Console.WriteLine("Student already in course.");
+            studentEmail = string.Empty;
+			return;
+		}
+
+        var allStudents = await StudentService.GetAllStudentsAsync();
+
+        if (allStudents.Any(s => s.Email.Equals(studentEmail, StringComparison.OrdinalIgnoreCase)))
+		{
+			var student = allStudents.First(s => s.Email.Equals(studentEmail, StringComparison.OrdinalIgnoreCase));
+			await ClassService.AddStudentToClassAsync(ClassId, student.Id);
+			students.Add(student);
+		}
+		else
+		{
+			Console.WriteLine("Student not found.");
+            studentEmail = string.Empty;
+            return;
+		}
+
+        students = students.OrderBy(s => s.Email).ToList();
+        studentEmail = string.Empty;
+
+        StateHasChanged();
+    }
+
+    private async Task RemoveStudent(string studentEmailToRemove)
+	{
+        var studentToRemove = students.FirstOrDefault(s => s.Email.Equals(studentEmailToRemove, StringComparison.OrdinalIgnoreCase));
+
+		if (studentToRemove != null)
+		{
+			await ClassService.RemoveStudentFromClassAsync(ClassId, studentToRemove.Id);
+            var studentsInCourse = await ClassService.GetStudentsInClassAsync(ClassId);
+            students = studentsInCourse.OrderBy(s => s.Email).ToList();
+		}
+
+        StateHasChanged();
+	}
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/");
+    }
+}
