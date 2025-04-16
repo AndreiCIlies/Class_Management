@@ -24,6 +24,3 @@ jobs:
       run: dotnet restore ClassManagementWebApp/ClassManagementWebApp/ClassManagementWebApp.csproj
     - name: Build
       run: dotnet build --no-restore ClassManagementWebApp/ClassManagementWebApp/ClassManagementWebApp.csproj
-#    Uncomment this when tests are added      
-#    - name: Test
-#      run: dotnet test --no-build --verbosity normal ClassManagementWebApp/ClassManagementWebApp/ClassManagementWebApp.csproj
