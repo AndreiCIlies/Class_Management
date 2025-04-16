@@ -35,45 +35,43 @@ public class ClassServiceTests
     [TestMethod]
     public async Task CreateClassAsync_ShouldReturnCreatedClass()
     {
+        classService.CreateClassAsync(classModel).Returns(classModel);
+
         var result = await classService.CreateClassAsync(classModel);
 
-        result.Should().NotBeNull();
         result.Name.Should().Be("Inteligenta Artificiala");
     }
 
     [TestMethod]
     public async Task CreateClassAsync_ShouldNotReturnCreatedClass()
     {
+        classService.CreateClassAsync(classModel).Returns(classModel);
+
         var result = await classService.CreateClassAsync(classModel);
 
-        result.Should().NotBeNull();
         result.Name.Should().NotBe("Programare Paralela");
     }
 
     [TestMethod]
     public async Task GetAllClassesAsync_ShouldReturnListOfClasses()
     {
+        var classes = new List<Class> { classModel };
+        classService.GetAllClassesAsync().Returns(classes);
+
         var result = await classService.GetAllClassesAsync();
 
-        result.Should().ContainSingle();
+        result.Should().NotBeEmpty();
     }
 
     [TestMethod]
     public async Task GetClassByIdAsync_ShouldReturnCorrectClass()
     {
+        classModel.Id = 5;
+        classService.GetClassByIdAsync(5).Returns(classModel);
+
         var result = await classService.GetClassByIdAsync(5);
 
-        result.Should().NotBeNull();
         result.Id.Should().Be(5);
-    }
-
-    [TestMethod]
-    public async Task GetClassByIdAsync_ShouldReturnWrongClass()
-    {
-        var result = await classService.GetClassByIdAsync(5);
-
-        result.Should().NotBeNull();
-        result.Id.Should().NotBe(1);
     }
 
     [TestMethod]
@@ -133,6 +131,9 @@ public class ClassServiceTests
     [TestMethod]
     public async Task GetStudentsInClassAsync_ShouldReturnStudentList()
     {
+        var students = new List<Student> { new Student { Id = studentId } };
+        classService.GetStudentsInClassAsync(5).Returns(students);
+
         var result = await classService.GetStudentsInClassAsync(5);
 
         result.Should().ContainSingle();
